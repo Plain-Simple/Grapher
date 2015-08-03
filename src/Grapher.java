@@ -67,8 +67,10 @@ public class Grapher {
 
     private Color backgroundColor;
 
-    // todo: check that range makes sense; Add documentation
+    private Color axisColor;
 
+    // todo: check that range makes sense; Add documentation
+    // todo: allow user to set BasicStrokes for components
     /**
      * Default constructor. Sets all values to default values.
      */
@@ -85,25 +87,24 @@ public class Grapher {
         BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         drawBackground(result);
         if(drawGridlines) {
-            result = drawGridLines(result);
+            drawGridLines(result);
         }
-        result = drawAxis(result);
+        drawAxis(result);
     }
 
     /**
      * Sets background color of graph using the backgroundColor
      * field.
-     * @param graph BufferedImage of graph being drawn
+     * @param graph BufferedImage object of graph being drawn
      */
-    private void drawBackground(BufferedImage graph) {
+    private void drawBackground(BufferedImage graph) { // todo: createGraphics() in the function calling this function
         graph.createGraphics().setBackground(backgroundColor);
     }
 
     /**
      * Uses class-defined settings to draw horizontal and vertical
      * grid lines on the BufferedImage.
-     * @param graph
-     * @return
+     * @param graph BufferedImage object of graph being drawn
      */
     private void drawGridLines(BufferedImage graph) {
         /* First, calculate distance between gridlines using image
@@ -112,6 +113,7 @@ public class Grapher {
         int spacing_y = graph.getHeight() / 10;
         Graphics2D grid_lines = graph.createGraphics();
         grid_lines.setStroke(new BasicStroke(10));
+        grid_lines.setColor(gridColor);
 
         /* Draw vertical grid lines */
         for(int i = spacing_x; i < graph.getWidth(); i += spacing_x) {
@@ -120,9 +122,23 @@ public class Grapher {
 
         /* Draw horizontal grid lines */
         for(int i = spacing_y; i < graph.getHeight(); i += spacing_y) {
-            
+            grid_lines.draw(new Line2D.Double(0, i, 0, graph.getWidth()));
         }
     }
+
+    /**
+     *
+     * @param graph
+     */
+    private void drawAxis(BufferedImage graph) {
+        Graphics2D axis = graph.createGraphics();
+        axis.setStroke(new BasicStroke(15));
+        axis.setColor(axisColor);
+
+        axis.draw(new Line2D.Double(graph.getWidth() / 2, 0, graph.getWidth() / 2, graph.getHeight()));
+        axis.draw(new Line2D.Double(0, graph.getHeight() / 2, graph.getWidth(), graph.getHeight() / 2));
+    }
+
 
     public long calculate(long x) {
 
