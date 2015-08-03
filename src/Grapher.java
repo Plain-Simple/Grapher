@@ -1,7 +1,6 @@
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
 /**
  * A class for rendering graphs.
@@ -54,23 +53,54 @@ public class Grapher {
     private boolean drawGridlines;
 
     /**
-     *
+     * space between gridlines = img.width() * gridLineSpacing
+     * also space between ticks
      */
-    private boolean drawTicks;
+    private float gridLineSpacing;
 
     /**
-     * Color of axis to be drawn.
+     * relative width of each gridline and tick
      */
-    private Color graphColor;
-    
-    private Color gridColor;
+    private float gridLineWidth;
 
+    private Color gridLineColor;
+
+    private BasicStroke gridLineStroke;
+
+    /**
+     *
+     */
+    private boolean drawTicks; // todo: add label ticks option
+
+    private BasicStroke tickStroke;
+
+    private float tickLength;
+    /**
+     * Background color of graph.
+     */
     private Color backgroundColor;
 
+    /**
+     * Color of axis, and ticks, if drawTicks = true.
+     */
     private Color axisColor;
+
+    /**
+     * BasicStroke style used for drawing axis.
+     */
+    private BasicStroke axisStroke;
+
+    /**
+     * Relative width of axis (i.e. 0.05f will draw
+     * an axis with a width equal to 5% of the image's
+     * width). The same value is used for drawing x- and y-axis,
+     * regardless of width and height being different values.
+     */
+    private float axisWidth;
 
     // todo: check that range makes sense; Add documentation
     // todo: allow user to set BasicStrokes for components
+    // todo: set gridlines using relative value (e.g. 10% of width)
     /**
      * Default constructor. Sets all values to default values.
      */
@@ -80,16 +110,19 @@ public class Grapher {
     }
 
     /**
-     *
-     * @return
+     * Draws the grid, or background, for the function/points
+     * to be plotted on graph. Fills in background color
+     * of graph, draws grid lines (if drawGridLines = true),
+     * draws axis, and draws ticks (if drawTicks = true) using
+     * styles.
+     * @param graph BufferedImage object of graph being drawn
      */
-    public BufferedImage drawGrid() {
-        BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        drawBackground(result);
+    public void drawGrid(BufferedImage graph) {
+        drawBackground(graph);
         if(drawGridlines) {
-            drawGridLines(result);
+            drawGridLines(graph);
         }
-        drawAxis(result);
+        drawAxis(graph);
     }
 
     /**
@@ -97,7 +130,7 @@ public class Grapher {
      * field.
      * @param graph BufferedImage object of graph being drawn
      */
-    private void drawBackground(BufferedImage graph) { // todo: createGraphics() in the function calling this function
+    private void drawBackground(BufferedImage graph) { // todo: createGraphics() in the function calling this function?
         graph.createGraphics().setBackground(backgroundColor);
     }
 
@@ -109,11 +142,11 @@ public class Grapher {
     private void drawGridLines(BufferedImage graph) {
         /* First, calculate distance between gridlines using image
          * height and width and range to display. */
-        int spacing_x = graph.getWidth() / 10;
-        int spacing_y = graph.getHeight() / 10;
+        int spacing_x = (int) (graph.getWidth() * gridLineSpacing);
+        int spacing_y = (int) (graph.getHeight() * gridLineSpacing);
         Graphics2D grid_lines = graph.createGraphics();
-        grid_lines.setStroke(new BasicStroke(10));
-        grid_lines.setColor(gridColor);
+        grid_lines.setStroke(gridLineStroke);
+        grid_lines.setColor(gridLineColor);
 
         /* Draw vertical grid lines */
         for(int i = spacing_x; i < graph.getWidth(); i += spacing_x) {
@@ -132,16 +165,59 @@ public class Grapher {
      */
     private void drawAxis(BufferedImage graph) {
         Graphics2D axis = graph.createGraphics();
-        axis.setStroke(new BasicStroke(15));
+        axis.setStroke(axisStroke);
         axis.setColor(axisColor);
 
         axis.draw(new Line2D.Double(graph.getWidth() / 2, 0, graph.getWidth() / 2, graph.getHeight()));
         axis.draw(new Line2D.Double(0, graph.getHeight() / 2, graph.getWidth(), graph.getHeight() / 2));
     }
 
+    /**
+     * Draws ticks along x- and y-axis.
+     * Uses gridLineSpacing to determine space between ticks,
+     * axisColor to determine color of ticks that are drawn,
+     * and tickStroke to style the ticks.
+     * @param graph
+     */
+    private void drawTicks(BufferedImage graph) {
+        Graphics2D ticks = graph.createGraphics();
+        ticks.setStroke(tickStroke);
+        ticks.setColor(axisColor);
 
+        /* Calculate spacing along x- and y-axis between individual
+         * ticks */
+        int spacing_x = (int) (graph.getWidth() * gridLineSpacing);
+        int spacing_y = (int) (graph.getHeight() * gridLineSpacing);
+
+        /* Calculate length of each tick based on image width */
+        int tick_length = (int) (graph.getWidth() * tickLength);
+
+        /* Calculate x-start and x-end coordinates of ticks on the y-axis */
+        int tick_start = graph.getWidth() / 2 - tick_length / 2;
+        int tick_end = graph.getWidth() / 2 + tick_length / 2;
+
+        for(int i = spacing_x; i < graph.getWidth(); i += spacing_x) { // todo: refactoring
+            ticks.draw(new Line2D.Double(tick_start, i, tick_end, i));
+        }
+
+        /* Calculate y-start and y-end coordinates of ticks on the x-axis */
+        tick_start = graph.getHeight() / 2 + tick_length / 2;
+        tick_end = graph.getHeight() / 2 - tick_length / 2;
+
+        for(int i = spacing_y; i < graph.getHeight(); i += spacing_y) {
+            ticks.draw(new Line2D.Double(i, tick_start, i, tick_end));
+        }
+    }
+
+    /**
+     * "y = " or "f(x)" function used for graphing user-specified
+     * function. By default, returns x.
+     * To change this the user must enter their own expression.
+     * @param x x-value used to calculate f(x)
+     * @return f(x) using expression
+     */
     public long calculate(long x) {
-
+        return x;
     }
 
     private boolean validateWindow() {
@@ -150,12 +226,10 @@ public class Grapher {
 
     /**
      *
-     * @param values if null then uses calculate
-     * @param rangeLow
-     * @param rangeHigh
+     * @param values x- and y-values of points to plot and emphasize
      * @return
      */
-    public BufferedImage drawGraph(long[][] values, long rangeLow, long rangeHigh) {
+    public BufferedImage drawGraph(long[][] values) {
 
     }
 
@@ -174,26 +248,34 @@ public class Grapher {
 
     }
 
-    public Graphics drawGraph(Graphics grid, long rangeLow, long rangeHigh) {
+    /**
+     * drawGraph() uses calculate and graph range
+     * @return
+     */
+    public BufferedImage drawGraph() {
 
     }
 
-    public Graphics emphasizePoint() {
-
-    }
-
-    public Graphics labelPoint() {
+    public BufferedImage drawGraph(Graphics grid) {
 
     }
 
     /**
-     * Renders Graphics object to specified file. // todo: how trivial is it for the user to do this themselves?
-     * @param g
-     * @param toSave
-     * @param extension
+     * uses calculate and given range (piecewise functions)
+     * @param grid
+     * @param rangeLow
+     * @param rangeHigh
      * @return
      */
-    public File renderFile(Graphics g, File toSave, String extension) {
+    public Graphics drawGraph(Graphics grid, long rangeLow, long rangeHigh) {
+
+    }
+
+    public Graphics emphasizePoints(long[][] coordinates) {
+
+    }
+
+    public Graphics labelPoint(long xCoordinate, long yCoordinate) {
 
     }
 }
