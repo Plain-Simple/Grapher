@@ -151,8 +151,7 @@ public class Grapher {
      * @return blank_image with grid drawn on it
      */
     public BufferedImage drawGrid(BufferedImage blank_image) { // todo: either pass as Graphics or createGraphics here
-        width = blank_image.getWidth(); // todo: private void setWidthHeight(BufferedImage) ?
-        height = blank_image.getHeight();
+        setWidthHeight(blank_image);
 
         if(validateSettings()) {
             Graphics2D graphics = blank_image.createGraphics();
@@ -312,8 +311,7 @@ public class Grapher {
      * size than long[1]
      */
     public BufferedImage drawGraph(BufferedImage blank_image, long[][] points) throws IndexOutOfBoundsException {
-        width = blank_image.getWidth();
-        height = blank_image.getHeight();
+        setWidthHeight(blank_image);
 
         if(validateSettings()) {
             Graphics2D graph = blank_image.createGraphics();
@@ -338,8 +336,7 @@ public class Grapher {
      * @return
      */
     public BufferedImage drawGraphOnGrid(BufferedImage grid, long[][] points) throws IndexOutOfBoundsException {
-        width = grid.getWidth();
-        height = grid.getHeight();
+        setWidthHeight(grid);
 
         if(validateSettings()) {
             Graphics2D graph = grid.createGraphics();
@@ -355,13 +352,23 @@ public class Grapher {
      * drawGraph() uses calculate and graph range
      * @return
      */
-    public BufferedImage drawGraph(BufferedImage blank_image) { // todo: allow setting ranges
-        width = grid.getWidth();
-        height = grid.getHeight();
+    public BufferedImage drawGraph(BufferedImage blank_image, long rangeLow, long rangeHigh) { // todo: allow setting ranges
+        setWidthHeight(blank_image);
+        drawBackground(blank_image.createGraphics());
+        return drawGraphOnGrid(blank_image, rangeLow, rangeHigh);
     }
 
-    public BufferedImage drawGraph(Graphics grid) {
+    public BufferedImage drawGraphOnGrid(BufferedImage grid, long rangeLow, long rangeHigh) { // todo: exclusive v. inclusive points
+        setWidthHeight(grid);
+        Graphics2D graph = grid.createGraphics();
 
+        float units_per_pxl = (xMax - xMin) / width;
+
+        for(long i = rangeLow; i <= rangeHigh; i += units_per_pxl) {
+            plotPoint(graph, i, calculate(i));
+        }
+
+        return grid;
     }
 
     /**
@@ -411,23 +418,23 @@ public class Grapher {
         return new int[] {(int) ((xCoordinate - xMin) * x_px_unit), (int) ((yCoordinate - yMin) * y_px_unit)};
     }
 
-    private long pixelToCoordinate(int xCoordinate, int yCoordinate) {
+    //private long pixelToCoordinate(int xCoordinate, int yCoordinate) {
 
-    }
+    //}
 
     /**
      * Sets width and height fields based on specifications of
      * to_draw.
      * This is used to keep the width and height fields up to date
      * with the BufferedImage being drawn on.
-     * @param to_draw
+     * @param to_draw BufferedImage upon which the graph will be drawn
      */
     private void setWidthHeight(BufferedImage to_draw) {
         width = to_draw.getWidth();
         height = to_draw.getHeight();
     }
 
-    public Graphics labelPoint(long xCoordinate, long yCoordinate) {
+    //public Graphics labelPoint(long xCoordinate, long yCoordinate) {
 
-    }
+    //}
 }
