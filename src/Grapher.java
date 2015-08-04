@@ -150,59 +150,63 @@ public class Grapher {
      * @param graph BufferedImage object of graph being drawn
      */
     public void drawGrid(BufferedImage graph) { // todo: either pass as Graphics or createGraphics here
-
-        drawBackground(graph);
-        if(drawGridlines) {
-            drawGridLines(graph);
-        }
-        drawAxis(graph);
+        Graphics2D graphics = graph.createGraphics();
+        drawBackground(graphics);
+        if(drawGridlines)
+            drawGridLines(graphics, graph.getWidth(), graph.getHeight());
+        drawAxis(graphics, graph.getWidth(), graph.getHeight());
+        if(drawTicks)
+            drawTicks(graphics, graph.getWidth(), graph.getHeight());
     }
 
     /**
      * Sets background color of graph using the backgroundColor
      * field.
-     * @param graph BufferedImage object of graph being drawn
+     * @param graph Graphics2D object of graph being drawn
      */
-    private void drawBackground(BufferedImage graph) {
-        graph.createGraphics().setBackground(backgroundColor);
+    private void drawBackground(Graphics2D graph) {
+        graph.setBackground(backgroundColor);
     }
 
     /**
      * Uses class-defined settings to draw horizontal and vertical
      * grid lines on the BufferedImage.
-     * @param graph BufferedImage object of graph being drawn
+     * @param graph Graphics2D object of graph being drawn
+     * @param biWidth width of graph being drawn, in pixels
+     * @param biHeight height of graph being drawn, in pixels
      */
-    private void drawGridLines(BufferedImage graph) {
+    private void drawGridLines(Graphics2D graph, int biWidth, int biHeight) {
         /* First, calculate distance between gridlines using image
          * height and width and range to display. */
-        int spacing_x = (int) (graph.getWidth() * gridLineSpacing);
-        int spacing_y = (int) (graph.getHeight() * gridLineSpacing);
-        Graphics2D grid_lines = graph.createGraphics();
-        grid_lines.setStroke(gridLineStroke);
-        grid_lines.setColor(gridLineColor);
+        int spacing_x = (int) (biWidth * gridLineSpacing);
+        int spacing_y = (int) (biHeight * gridLineSpacing);
+
+        graph.setStroke(gridLineStroke);
+        graph.setColor(gridLineColor);
 
         /* Draw vertical grid lines */
-        for(int i = spacing_x; i < graph.getWidth(); i += spacing_x) {
-            grid_lines.draw(new Line2D.Double(i, 0, i, graph.getHeight()));
+        for(int i = spacing_x; i < biWidth; i += spacing_x) {
+            graph.draw(new Line2D.Double(i, 0, i, biHeight));
         }
 
         /* Draw horizontal grid lines */
-        for(int i = spacing_y; i < graph.getHeight(); i += spacing_y) {
-            grid_lines.draw(new Line2D.Double(0, i, 0, graph.getWidth()));
+        for(int i = spacing_y; i < biHeight; i += spacing_y) {
+            graph.draw(new Line2D.Double(0, i, 0, biWidth));
         }
     }
 
     /**
      *
      * @param graph
+     * @param biWidth
+     * @param biHeight
      */
-    private void drawAxis(BufferedImage graph) { // todo: axis may not be centered
-        Graphics2D axis = graph.createGraphics();
-        axis.setStroke(axisStroke);
-        axis.setColor(axisColor);
+    private void drawAxis(Graphics2D graph, int biWidth, int biHeight) { // todo: axis may not be centered
+        graph.setStroke(axisStroke);
+        graph.setColor(axisColor);
 
-        axis.draw(new Line2D.Double(graph.getWidth() / 2, 0, graph.getWidth() / 2, graph.getHeight()));
-        axis.draw(new Line2D.Double(0, graph.getHeight() / 2, graph.getWidth(), graph.getHeight() / 2));
+        graph.draw(new Line2D.Double(biWidth / 2, 0, biWidth / 2, biHeight));
+        graph.draw(new Line2D.Double(0, biHeight / 2, biWidth, biHeight / 2));
     }
 
     /**
@@ -212,33 +216,32 @@ public class Grapher {
      * and tickStroke to style the ticks.
      * @param graph
      */
-    private void drawTicks(BufferedImage graph) {
-        Graphics2D ticks = graph.createGraphics();
-        ticks.setStroke(tickStroke);
-        ticks.setColor(axisColor);
+    private void drawTicks(Graphics2D graph, int biWidth, int biHeight) {
+        graph.setStroke(tickStroke);
+        graph.setColor(axisColor);
 
         /* Calculate spacing along x- and y-axis between individual
          * ticks */
-        int spacing_x = (int) (graph.getWidth() * gridLineSpacing);
-        int spacing_y = (int) (graph.getHeight() * gridLineSpacing);
+        int spacing_x = (int) (biWidth * gridLineSpacing);
+        int spacing_y = (int) (biHeight * gridLineSpacing);
 
         /* Calculate length of each tick based on image width */
-        int tick_length = (int) (graph.getWidth() * tickLength);
+        int tick_length = (int) (biWidth * tickLength);
 
         /* Calculate x-start and x-end coordinates of ticks on the y-axis */
-        int tick_start = graph.getWidth() / 2 - tick_length / 2;
-        int tick_end = graph.getWidth() / 2 + tick_length / 2;
+        int tick_start = biWidth / 2 - tick_length / 2;
+        int tick_end = biWidth / 2 + tick_length / 2;
 
-        for(int i = spacing_x; i < graph.getWidth(); i += spacing_x) { // todo: refactoring
-            ticks.draw(new Line2D.Double(tick_start, i, tick_end, i));
+        for(int i = spacing_x; i < biWidth; i += spacing_x) { // todo: refactoring
+            graph.draw(new Line2D.Double(tick_start, i, tick_end, i));
         }
 
         /* Calculate y-start and y-end coordinates of ticks on the x-axis */
-        tick_start = graph.getHeight() / 2 + tick_length / 2;
-        tick_end = graph.getHeight() / 2 - tick_length / 2;
+        tick_start = biHeight / 2 + tick_length / 2;
+        tick_end = biHeight / 2 - tick_length / 2;
 
-        for(int i = spacing_y; i < graph.getHeight(); i += spacing_y) {
-            ticks.draw(new Line2D.Double(i, tick_start, i, tick_end));
+        for(int i = spacing_y; i < biHeight; i += spacing_y) {
+            graph.draw(new Line2D.Double(i, tick_start, i, tick_end));
         }
     }
 
@@ -365,7 +368,7 @@ public class Grapher {
                     (int) (plotWidth / 2), (int) (plotWidth / 2));
         }
     }
-    
+
     /**
      * uses calculate and given range (piecewise functions)
      * @param grid
