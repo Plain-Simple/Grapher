@@ -147,16 +147,24 @@ public class Grapher {
      * of graph, draws grid lines (if drawGridLines = true),
      * draws axis, and draws ticks (if drawTicks = true) using
      * styles.
-     * @param graph BufferedImage object of graph being drawn
+     * @param blank_image blank BufferedImage for grid to be drawn on
+     * @return blank_image with grid drawn on it
      */
-    public void drawGrid(BufferedImage graph) { // todo: either pass as Graphics or createGraphics here
-        Graphics2D graphics = graph.createGraphics();
-        drawBackground(graphics);
-        if(drawGridlines)
-            drawGridLines(graphics, graph.getWidth(), graph.getHeight());
-        drawAxis(graphics, graph.getWidth(), graph.getHeight());
-        if(drawTicks)
-            drawTicks(graphics, graph.getWidth(), graph.getHeight());
+    public BufferedImage drawGrid(BufferedImage blank_image) { // todo: either pass as Graphics or createGraphics here
+        width = blank_image.getWidth(); // todo: private void setWidthHeight(BufferedImage) ?
+        height = blank_image.getHeight();
+
+        if(validateSettings()) {
+            Graphics2D graphics = blank_image.createGraphics();
+            drawBackground(graphics);
+            if (drawGridlines)
+                drawGridLines(graphics, width, height);
+            drawAxis(graphics, width, height);
+            if (drawTicks)
+                drawTicks(graphics, width, height);
+        }
+
+        return blank_image;
     }
 
     /**
@@ -298,20 +306,24 @@ public class Grapher {
      * long[1][index] gives the coresponding y-coordinate. Points are
      * drawn as circles using plotStroke, plotWidth, and plotColor
      * properties. // todo: properties or fields?
-     * @param points x- and y-values of points to plot and emphasize
+     * @param points x- and y-values of points to plot and emphasize // todo: update
      * @return
      * @throws IndexOutOfBoundsException - if long[0] is a different
      * size than long[1]
      */
-    public BufferedImage drawGraph(long[][] points) throws NumberFormatException {
+    public BufferedImage drawGraph(BufferedImage blank_image, long[][] points) throws NumberFormatException {
+        width = blank_image.getWidth();
+        height = blank_image.getHeight();
+
         if(validateSettings()) {
-            Graphics2D graph =
-                    (new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)).createGraphics();
-            drawBackground(graph); // todo: pass Graphics2D object?
+            Graphics2D graph = blank_image.createGraphics();
+            drawBackground(graph);
             for(int i = 0; i < points[0].length; i++) {
                 plotPoint(graph, points[0][i], points[1][i]);
             }
         }
+
+        return blank_image;
     }
 
     /**
@@ -351,22 +363,41 @@ public class Grapher {
      * @param xCoordinate x-coordinate of point being plotted
      * @param yCoordinate y-coordinate of point being plotted
      */
-    private void plotPoint(Graphics2D graph, long xCoordinate, long yCoordinate) {
+    private void plotPoint(Graphics2D graph, long xCoordinate, long yCoordinate) { // todo: height and width shouldn't be class variables. They should be specified when creating each graph individually
         /* Check to see if coordinates fall in graph range */
         if((xCoordinate >= xMin && xCoordinate <= xMax) && (yCoordinate >= yMin && yCoordinate <= yMax)) {
-            /* Calculate "range" covered on each axis */
-            long x_range = xMax - xMin;
-            long y_range = yMax - yMin;
-
-            /* Calculate pixels per unit */
-            long x_px_unit = width / x_range;
-            long y_px_unit = height / y_range;
+            /* Convert number coordinates to a coordinate on graph's user space */
+            int[] px_coordinates = coordinateToPixel(xCoordinate, yCoordinate);
 
             graph.setColor(plotColor);
             graph.setStroke(plotStroke); // todo: test
-            graph.fillOval((int) ((xCoordinate - xMin) * x_px_unit), (int) ((yCoordinate - yMin) * y_px_unit),
-                    (int) (plotWidth / 2), (int) (plotWidth / 2));
+
+            /* Draw a point with diameter = plotWidth at specified coordinates in userspace */
+            graph.fillOval(px_coordinates[0], px_coordinates[1], (int) (plotWidth / 2), (int) (plotWidth / 2));
         }
+    }
+
+    /**
+     * Converts coordinates of a point on the graph to coordinates of // todo: make sure height and width aren't greater than int limit (32765)
+     * that point on the userspace of the Graphics2D object where drawing
+     * takes place.
+     * Uses window settings and height and width fields. Errors will occur
+     * if these settings are not up to date.
+     * @param xCoordinate
+     * @param yCoordinate
+     * @return int[] where int[0] is x-coordinate and int[1] is y-coordinate of
+     * point's location in userspace
+     */
+    private int[] coordinateToPixel(long xCoordinate, long yCoordinate) {
+        /* Calculate "range" covered on each axis */
+        long x_range = xMax - xMin;
+        long y_range = yMax - yMin;
+
+        /* Calculate pixels per unit */
+        long x_px_unit = width / x_range;
+        long y_px_unit = height / y_range;
+
+        return new int[] {(int) ((xCoordinate - xMin) * x_px_unit), (int) ((yCoordinate - yMin) * y_px_unit)};
     }
 
     /**
