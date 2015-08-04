@@ -261,8 +261,9 @@ public class Grapher {
      * settings relative to height and width are less
      * than or equal to one.
      * @return whether all settings are valid
+     * @throws IndexOutOfBoundsException - if settings break the rules
      */
-    private boolean validateSettings() throws IndexOutOfBoundsException {
+    private boolean validateSettings() throws IndexOutOfBoundsException { // todo: improve
         if(xMax <= xMin)
             throw new IndexOutOfBoundsException("xMax cannot be less than or equal to xMin");
         if(yMax <= yMin)
@@ -271,6 +272,8 @@ public class Grapher {
             throw new IndexOutOfBoundsException("height cannot be less than or equal to zero");
         if(width <= 0)
             throw new IndexOutOfBoundsException("width cannot be less than or equal to zero");
+        if(gridLineStroke.getLineWidth() > width || gridLineStroke.getLineWidth() > height)
+            throw new IndexOutOfBoundsException("gridLineStroke LineWidth cannot be larger than width or height");
         if(gridLineSpacing > 1)
             throw new IndexOutOfBoundsException("gridLineSpacing cannot be greater than one");
         if(gridLineThickness > 1)
@@ -294,9 +297,18 @@ public class Grapher {
      * properties. // todo: properties or fields?
      * @param points x- and y-values of points to plot and emphasize
      * @return
+     * @throws IndexOutOfBoundsException - if long[0] is a different
+     * size than long[1]
      */
-    public BufferedImage drawGraph(long[][] points) {
-
+    public BufferedImage drawGraph(long[][] points) throws NumberFormatException {
+        if(validateSettings()) {
+            Graphics2D graph =
+                    (new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)).createGraphics();
+            drawBackground(graph); // todo: pass Graphics2D object?
+            for(int i = 0; i < points[0].length; i++) {
+                plotPoint(graph, points[0][i], points[1][i]);
+            }
+        }
     }
 
     /**
@@ -327,6 +339,24 @@ public class Grapher {
     }
 
     /**
+     * Converts xCoordinate and yCoordinate to a coordinate
+     * on the userspace of graph and draws a filled circle
+     * of radius (width * graphWidth) / 2 and color graphColor. // todo: missing anything?
+     * Note: if coordinates are out of graph's range they will
+     * not be plotted.
+     * @param graph Graphics2D object of graph being drawn on
+     * @param xCoordinate x-coordinate of point being plotted
+     * @param yCoordinate y-coordinate of point being plotted
+     */
+    private void plotPoint(Graphics2D graph, long xCoordinate, long yCoordinate) {
+        long x_range = xMax - xMin;
+        long y_range = yMax - yMin;
+
+
+        float x_unit_pixel = x_range / width;
+        float y_unit_pixel = y_range / width;
+    }
+    /**
      * uses calculate and given range (piecewise functions)
      * @param grid
      * @param rangeLow
@@ -334,10 +364,6 @@ public class Grapher {
      * @return
      */
     public Graphics drawGraph(Graphics grid, long rangeLow, long rangeHigh) {
-
-    }
-
-    public Graphics emphasizePoints(long[][] coordinates) {
 
     }
 
