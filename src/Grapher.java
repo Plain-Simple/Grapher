@@ -49,26 +49,46 @@ public class Grapher {
 
     /**
      * Whether or not to draw grid lines in the graph's background,
-     * behind the axis.
+     * behind the axis. Grid lines are drawn vertically and
+     * horizontally across the graph. Note that no lines are drawn
+     * along the edges of the graph.
      */
     private boolean drawGridlines;
 
     /**
-     * space between gridlines = img.width() * gridLineSpacing
-     * also space between ticks
+     * Relative space between gridlines, if drawGridLines = true.
+     * On the x-axis, the absolute space (in pixels) is determined
+     * using the formula width * gridLineSpacing, and on the y-axis
+     * is determined by the formula height * gridLineSpacing.
+     * Because ticks are only drawn where there are grid lines,
+     * this setting also determines the spacing between ticks.
      */
     private float gridLineSpacing;
 
     /**
-     * relative width of each gridline and tick
+     * Relative thickness, or width, of each grid line, if
+     * drawGridLines = true. The absolute thickness (in pixels)
+     * of a grid line is determined using the formula
+     * width * gridLineThickness. Note that height is not used
+     * in this calculation.
+     * This setting also sets the thickness of ticks, if
+     * drawTicks = true.
      */
-    private float gridLineWidth;
+    private float gridLineThickness;
 
+    /**
+     * Color of grid lines. // todo: specify default values
+     */
     private Color gridLineColor;
 
+    /**
+     * BasicStroke used when drawing grid lines with the Graphics
+     * API
+     */
     private BasicStroke gridLineStroke;
 
     /**
+     * Whether or not to draw ticks along the x- and y-axis.
      *
      */
     private boolean drawTicks; // todo: add label ticks option
@@ -76,26 +96,31 @@ public class Grapher {
     private BasicStroke tickStroke;
 
     private float tickLength;
+
+    private boolean labelTicks;
+
     /**
      * Background color of graph.
      */
     private Color backgroundColor;
 
     /**
-     * Color of axis, and ticks, if drawTicks = true.
+     * Color of axis, and ticks drawn along axis
+     * (if drawTicks = true).
      */
     private Color axisColor;
 
     /**
-     * BasicStroke style used for drawing axis.
+     * BasicStroke style used for drawing the axis with the
+     * Graphics API
      */
     private BasicStroke axisStroke;
 
     /**
-     * Relative width of axis (i.e. 0.05f will draw
-     * an axis with a width equal to 5% of the image's
-     * width). The same value is used for drawing x- and y-axis,
-     * regardless of width and height being different values.
+     * Relative width of axis compared to width of graph.
+     * The absolute value in pixels is calculated with the
+     * formula width * axisWidth. Note that height is not
+     * used in this calculation.
      */
     private float axisWidth;
 
