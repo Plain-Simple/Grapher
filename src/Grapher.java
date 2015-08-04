@@ -196,7 +196,7 @@ public class Grapher {
      *
      * @param graph
      */
-    private void drawAxis(BufferedImage graph) {
+    private void drawAxis(BufferedImage graph) { // todo: axis may not be centered
         Graphics2D axis = graph.createGraphics();
         axis.setStroke(axisStroke);
         axis.setColor(axisColor);
@@ -349,13 +349,23 @@ public class Grapher {
      * @param yCoordinate y-coordinate of point being plotted
      */
     private void plotPoint(Graphics2D graph, long xCoordinate, long yCoordinate) {
-        long x_range = xMax - xMin;
-        long y_range = yMax - yMin;
+        /* Check to see if coordinates fall in graph range */
+        if((xCoordinate >= xMin && xCoordinate <= xMax) && (yCoordinate >= yMin && yCoordinate <= yMax)) {
+            /* Calculate "range" covered on each axis */
+            long x_range = xMax - xMin;
+            long y_range = yMax - yMin;
 
+            /* Calculate pixels per unit */
+            long x_px_unit = width / x_range;
+            long y_px_unit = height / y_range;
 
-        float x_unit_pixel = x_range / width;
-        float y_unit_pixel = y_range / width;
+            graph.setColor(plotColor);
+            graph.setStroke(plotStroke); // todo: test
+            graph.fillOval((int) ((xCoordinate - xMin) * x_px_unit), (int) ((yCoordinate - yMin) * y_px_unit),
+                    (int) (plotWidth / 2), (int) (plotWidth / 2));
+        }
     }
+    
     /**
      * uses calculate and given range (piecewise functions)
      * @param grid
