@@ -124,6 +124,12 @@ public class Grapher {
      */
     private float axisWidth;
 
+    private BasicStroke plotStroke; // todo: is plotWidth redundant if plotStroke already sets width of pixels to draw?
+
+    private float plotWidth;
+
+    private Color plotColor;
+
     // todo: check that range makes sense; Add documentation
     // todo: allow user to set BasicStrokes for components
     // todo: set gridlines using relative value (e.g. 10% of width)
@@ -143,7 +149,8 @@ public class Grapher {
      * styles.
      * @param graph BufferedImage object of graph being drawn
      */
-    public void drawGrid(BufferedImage graph) {
+    public void drawGrid(BufferedImage graph) { // todo: either pass as Graphics or createGraphics here
+
         drawBackground(graph);
         if(drawGridlines) {
             drawGridLines(graph);
@@ -156,7 +163,7 @@ public class Grapher {
      * field.
      * @param graph BufferedImage object of graph being drawn
      */
-    private void drawBackground(BufferedImage graph) { // todo: createGraphics() in the function calling this function?
+    private void drawBackground(BufferedImage graph) {
         graph.createGraphics().setBackground(backgroundColor);
     }
 
@@ -247,16 +254,33 @@ public class Grapher {
     }
 
     /**
-     * Checks to make sure that the values defining window range
-     * are valid. xMax must be greater than xMin and yMax must
-     * be greater than yMin.
-     * @return whether window range is valid
+     * Checks to make sure that all settings are valid.
+     * xMax must be greater than xMin and yMax must
+     * be greater than yMin. Height and Width must
+     * be greater than zero. Also makes sure that all
+     * settings relative to height and width are less
+     * than or equal to one.
+     * @return whether all settings are valid
      */
-    private boolean validateWindow() {
+    private boolean validateSettings() throws IndexOutOfBoundsException {
         if(xMax <= xMin)
-            return false;
+            throw new IndexOutOfBoundsException("xMax cannot be less than or equal to xMin");
         if(yMax <= yMin)
-            return false;
+            throw new IndexOutOfBoundsException("yMax cannot be less than or equal to yMin");
+        if(height <= 0)
+            throw new IndexOutOfBoundsException("height cannot be less than or equal to zero");
+        if(width <= 0)
+            throw new IndexOutOfBoundsException("width cannot be less than or equal to zero");
+        if(gridLineSpacing > 1)
+            throw new IndexOutOfBoundsException("gridLineSpacing cannot be greater than one");
+        if(gridLineThickness > 1)
+            throw new IndexOutOfBoundsException("gridLineThickness cannot be greater than one");
+        if(tickLength > 1)
+            throw new IndexOutOfBoundsException("tickLength cannot be greater than one");
+        if(axisWidth > 1)
+            throw new IndexOutOfBoundsException("axisWidth cannot be greater than one");
+        if(plotWidth > 1)
+            throw new IndexOutOfBoundsException("plotWidth cannot be greater than one");
         return true;
     }
 
@@ -266,7 +290,8 @@ public class Grapher {
      * Coordinates of points to draw on graph are passed in 2d array
      * where long[0][index] gives the x-coordinate of a point and
      * long[1][index] gives the coresponding y-coordinate. Points are
-     * emphasized using the // todo: how to draw points?
+     * drawn as circles using plotStroke, plotWidth, and plotColor
+     * properties. // todo: properties or fields?
      * @param points x- and y-values of points to plot and emphasize
      * @return
      */
