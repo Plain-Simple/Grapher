@@ -7,3 +7,4 @@
 -Emphasize and label specified points
 -Choose filetype to save as, or return as Graphics object
 -Accept mathematical formulas to generate points
+-Support for piecewise functions

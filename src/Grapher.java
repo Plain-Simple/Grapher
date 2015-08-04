@@ -20,35 +20,36 @@ public class Grapher {
     private int width;
 
     /**
-     * The lowest y-coordinate displayed on the graph.
+     * Value of y-coordinate at the bottom edge of the graph.
      * Must be less than yMax. Considered a "window setting"
      * because it defines the range of the graph.
      */
     private long yMin;
 
     /**
-     * The highest y-coordinate displayed on the graph.
+     * Value of y-coordinate at the top edge of the graph.
      * Must be greater than yMin. Considered a "window setting"
      * because it defines the range of the graph.
      */
     private long yMax;
 
     /**
-     * The lowest x-coordinate displayed on the graph.
+     * Value of x-coordinate at the left edge of the graph.
      * Must be less than xMax. Considered a "window setting"
      * because it defines the range of the graph.
      */
     private long xMin;
 
     /**
-     * The highest x-coordinate displayed on the graph.
+     * Value of x-coordinate at the right edge of the graph.
      * Must be greater than xMin. Considered a "window setting"
      * because it defines the range of the graph.
      */
     private long xMax;
 
     /**
-     *
+     * Whether or not to draw grid lines in the graph's background,
+     * behind the axis.
      */
     private boolean drawGridlines;
 
@@ -220,16 +221,31 @@ public class Grapher {
         return x;
     }
 
+    /**
+     * Checks to make sure that the values defining window range
+     * are valid. xMax must be greater than xMin and yMax must
+     * be greater than yMin.
+     * @return whether window range is valid
+     */
     private boolean validateWindow() {
-
+        if(xMax <= xMin)
+            return false;
+        if(yMax <= yMin)
+            return false;
+        return true;
     }
 
     /**
-     *
-     * @param values x- and y-values of points to plot and emphasize
+     * Renders graph from scratch and draws and emphasizes specified
+     * points on the graph (as long as they are in the graph's range).
+     * Coordinates of points to draw on graph are passed in 2d array
+     * where long[0][index] gives the x-coordinate of a point and
+     * long[1][index] gives the coresponding y-coordinate. Points are
+     * emphasized using the // todo: how to draw points?
+     * @param points x- and y-values of points to plot and emphasize
      * @return
      */
-    public BufferedImage drawGraph(long[][] values) {
+    public BufferedImage drawGraph(long[][] points) {
 
     }
 
