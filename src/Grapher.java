@@ -136,9 +136,28 @@ public class Grapher {
     /**
      * Default constructor. Sets all values to default values.
      */
-    public Grapher(int height, int width) {
-        this.height = height;
-        this.width = width;
+    public Grapher() {
+        yMin = -10;
+        yMax = 10;
+        xMin = -10;
+        xMax = -10;
+
+        drawGridlines = true;
+        gridLineSpacing = 0.10f;
+        gridLineThickness = 0.01f;
+        gridLineColor = Color.BLUE;
+
+        drawTicks = true;
+        tickLength = 0.10f;
+        labelTicks = false;
+
+        backgroundColor = Color.WHITE;
+
+        axisColor = Color.BLACK;
+        axisWidth = 0.02f;
+
+        plotWidth = 0.01f;
+        plotColor = Color.BLUE;
     }
 
     /**
@@ -259,7 +278,7 @@ public class Grapher {
      * @param x x-value used to calculate f(x)
      * @return f(x) using expression
      */
-    public long calculate(long x) {
+    public double calculate(double x) {
         return x;
     }
 
@@ -301,16 +320,16 @@ public class Grapher {
      * Renders graph from scratch and draws and emphasizes specified
      * points on the graph (as long as they are in the graph's range).
      * Coordinates of points to draw on graph are passed in 2d array
-     * where long[0][index] gives the x-coordinate of a point and
-     * long[1][index] gives the coresponding y-coordinate. Points are
+     * where double[0][index] gives the x-coordinate of a point and
+     * double[1][index] gives the coresponding y-coordinate. Points are
      * drawn as circles using plotStroke, plotWidth, and plotColor
      * properties. // todo: properties or fields?
      * @param points x- and y-values of points to plot and emphasize // todo: update
      * @return
-     * @throws IndexOutOfBoundsException - if long[0] is a different
-     * size than long[1]
+     * @throws IndexOutOfBoundsException - if double[0] is a different
+     * size than double[1]
      */
-    public BufferedImage drawGraph(BufferedImage blank_image, long[][] points) throws IndexOutOfBoundsException {
+    public BufferedImage drawGraph(BufferedImage blank_image, double[][] points) throws IndexOutOfBoundsException {
         setWidthHeight(blank_image);
 
         if(validateSettings()) {
@@ -335,7 +354,7 @@ public class Grapher {
      * @param points
      * @return
      */
-    public BufferedImage drawGraphOnGrid(BufferedImage grid, long[][] points) throws IndexOutOfBoundsException {
+    public BufferedImage drawGraphOnGrid(BufferedImage grid, double[][] points) throws IndexOutOfBoundsException {
         setWidthHeight(grid);
 
         if(validateSettings()) {
@@ -352,19 +371,19 @@ public class Grapher {
      * drawGraph() uses calculate and graph range
      * @return
      */
-    public BufferedImage drawGraph(BufferedImage blank_image, long rangeLow, long rangeHigh) { // todo: allow setting ranges
+    public BufferedImage drawGraph(BufferedImage blank_image, double rangeLow, double rangeHigh) { // todo: allow setting ranges
         setWidthHeight(blank_image);
         drawBackground(blank_image.createGraphics());
         return drawGraphOnGrid(blank_image, rangeLow, rangeHigh);
     }
 
-    public BufferedImage drawGraphOnGrid(BufferedImage grid, long rangeLow, long rangeHigh) { // todo: exclusive v. inclusive points
+    public BufferedImage drawGraphOnGrid(BufferedImage grid, double rangeLow, double rangeHigh) { // todo: exclusive v. inclusive points
         setWidthHeight(grid);
         Graphics2D graph = grid.createGraphics();
 
         float units_per_pxl = (xMax - xMin) / width;
 
-        for(long i = rangeLow; i <= rangeHigh; i += units_per_pxl) {
+        for(double i = rangeLow; i <= rangeHigh; i += units_per_pxl) {
             plotPoint(graph, i, calculate(i));
         }
 
@@ -381,7 +400,7 @@ public class Grapher {
      * @param xCoordinate x-coordinate of point being plotted
      * @param yCoordinate y-coordinate of point being plotted
      */
-    private void plotPoint(Graphics2D graph, long xCoordinate, long yCoordinate) { // todo: height and width shouldn't be class variables. They should be specified when creating each graph individually
+    private void plotPoint(Graphics2D graph, double xCoordinate, double yCoordinate) { // todo: height and width shouldn't be class variables. They should be specified when creating each graph individually
         /* Check to see if coordinates fall in graph range */
         if((xCoordinate >= xMin && xCoordinate <= xMax) && (yCoordinate >= yMin && yCoordinate <= yMax)) {
             /* Convert number coordinates to a coordinate on graph's user space */
@@ -406,14 +425,14 @@ public class Grapher {
      * @return int[] where int[0] is x-coordinate and int[1] is y-coordinate of
      * point's location in userspace
      */
-    private int[] coordinateToPixel(long xCoordinate, long yCoordinate) {
+    private int[] coordinateToPixel(double xCoordinate, double yCoordinate) {
         /* Calculate "range" covered on each axis */
-        long x_range = xMax - xMin;
-        long y_range = yMax - yMin;
+        double x_range = xMax - xMin;
+        double y_range = yMax - yMin;
 
         /* Calculate pixels per unit */
-        long x_px_unit = width / x_range;
-        long y_px_unit = height / y_range;
+        double x_px_unit = width / x_range;
+        double y_px_unit = height / y_range;
 
         return new int[] {(int) ((xCoordinate - xMin) * x_px_unit), (int) ((yCoordinate - yMin) * y_px_unit)};
     }
@@ -434,7 +453,7 @@ public class Grapher {
         height = to_draw.getHeight();
     }
 
-    //public Graphics labelPoint(long xCoordinate, long yCoordinate) {
+    //public Graphics labelPoint(double xCoordinate, double yCoordinate) {
 
     //}
 }
