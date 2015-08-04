@@ -311,7 +311,7 @@ public class Grapher {
      * @throws IndexOutOfBoundsException - if long[0] is a different
      * size than long[1]
      */
-    public BufferedImage drawGraph(BufferedImage blank_image, long[][] points) throws NumberFormatException {
+    public BufferedImage drawGraph(BufferedImage blank_image, long[][] points) throws IndexOutOfBoundsException {
         width = blank_image.getWidth();
         height = blank_image.getHeight();
 
@@ -334,19 +334,30 @@ public class Grapher {
      * is x-coordinate and second index is y-coordinate.
      *
      * @param grid
-     * @param values
+     * @param points
      * @return
      */
-    public Graphics drawGraph(Graphics grid, long[][] values) {
+    public BufferedImage drawGraphOnGrid(BufferedImage grid, long[][] points) throws IndexOutOfBoundsException {
+        width = grid.getWidth();
+        height = grid.getHeight();
 
+        if(validateSettings()) {
+            Graphics2D graph = grid.createGraphics();
+            for(int i = 0; i < points[0].length; i++) {
+                plotPoint(graph, points[0][i], points[1][i]);
+            }
+        }
+
+        return grid;
     }
 
     /**
      * drawGraph() uses calculate and graph range
      * @return
      */
-    public BufferedImage drawGraph() {
-
+    public BufferedImage drawGraph(BufferedImage blank_image) { // todo: allow setting ranges
+        width = grid.getWidth();
+        height = grid.getHeight();
     }
 
     public BufferedImage drawGraph(Graphics grid) {
@@ -400,15 +411,20 @@ public class Grapher {
         return new int[] {(int) ((xCoordinate - xMin) * x_px_unit), (int) ((yCoordinate - yMin) * y_px_unit)};
     }
 
-    /**
-     * uses calculate and given range (piecewise functions)
-     * @param grid
-     * @param rangeLow
-     * @param rangeHigh
-     * @return
-     */
-    public Graphics drawGraph(Graphics grid, long rangeLow, long rangeHigh) {
+    private long pixelToCoordinate(int xCoordinate, int yCoordinate) {
 
+    }
+
+    /**
+     * Sets width and height fields based on specifications of
+     * to_draw.
+     * This is used to keep the width and height fields up to date
+     * with the BufferedImage being drawn on.
+     * @param to_draw
+     */
+    private void setWidthHeight(BufferedImage to_draw) {
+        width = to_draw.getWidth();
+        height = to_draw.getHeight();
     }
 
     public Graphics labelPoint(long xCoordinate, long yCoordinate) {
