@@ -140,7 +140,7 @@ public class Grapher {
         yMin = -10;
         yMax = 10;
         xMin = -10;
-        xMax = -10;
+        xMax = 10;
 
         drawGridlines = true;
         gridLineSpacing = 0.10f;
@@ -207,7 +207,8 @@ public class Grapher {
         int spacing_x = (int) (biWidth * gridLineSpacing);
         int spacing_y = (int) (biHeight * gridLineSpacing);
 
-        graph.setStroke(gridLineStroke);
+        if(gridLineStroke != null)
+            graph.setStroke(gridLineStroke);
         graph.setColor(gridLineColor);
 
         /* Draw vertical grid lines */
@@ -228,7 +229,8 @@ public class Grapher {
      * @param biHeight
      */
     private void drawAxis(Graphics2D graph, int biWidth, int biHeight) { // todo: axis may not be centered
-        graph.setStroke(axisStroke);
+        if(axisStroke != null)
+            graph.setStroke(axisStroke);
         graph.setColor(axisColor);
 
         graph.draw(new Line2D.Double(biWidth / 2, 0, biWidth / 2, biHeight));
@@ -243,7 +245,8 @@ public class Grapher {
      * @param graph
      */
     private void drawTicks(Graphics2D graph, int biWidth, int biHeight) {
-        graph.setStroke(tickStroke);
+        if(tickStroke != null)
+            graph.setStroke(tickStroke);
         graph.setColor(axisColor);
 
         /* Calculate spacing along x- and y-axis between individual
@@ -301,8 +304,8 @@ public class Grapher {
             throw new IndexOutOfBoundsException("height cannot be less than or equal to zero");
         if(width <= 0)
             throw new IndexOutOfBoundsException("width cannot be less than or equal to zero");
-        if(gridLineStroke.getLineWidth() > width || gridLineStroke.getLineWidth() > height)
-            throw new IndexOutOfBoundsException("gridLineStroke LineWidth cannot be larger than width or height");
+        //if(gridLineStroke.getLineWidth() > width || gridLineStroke.getLineWidth() > height)
+        //    throw new IndexOutOfBoundsException("gridLineStroke LineWidth cannot be larger than width or height");
         if(gridLineSpacing > 1)
             throw new IndexOutOfBoundsException("gridLineSpacing cannot be greater than one");
         if(gridLineThickness > 1)
@@ -406,8 +409,9 @@ public class Grapher {
             /* Convert number coordinates to a coordinate on graph's user space */
             int[] px_coordinates = coordinateToPixel(xCoordinate, yCoordinate);
 
+            if(plotStroke != null)
+                graph.setStroke(plotStroke); // todo: test
             graph.setColor(plotColor);
-            graph.setStroke(plotStroke); // todo: test
 
             /* Draw a point with diameter = plotWidth at specified coordinates in userspace */
             graph.fillOval(px_coordinates[0], px_coordinates[1], (int) (plotWidth / 2), (int) (plotWidth / 2));
