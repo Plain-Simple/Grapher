@@ -157,8 +157,8 @@ public class Grapher {
         axisColor = Color.BLACK;
         axisWidth = 0.02f;
 
-        plotWidth = 0.01f;
-        plotColor = Color.BLUE;
+        plotWidth = 0.05f;
+        plotColor = Color.RED;
     }
 
     /**
@@ -396,11 +396,12 @@ public class Grapher {
         setWidthHeight(blank_image);
 
         if(validateSettings()) {
-            //Graphics2D graph = blank_image.createGraphics();
-            drawGrid(blank_image);
-            //for(int i = 0; i < points[0].length; i++) {
-            //    plotPoint(graph, points[0][i], points[1][i]);
-            //}
+            blank_image = drawGrid(blank_image);
+            Graphics2D graph = blank_image.createGraphics();
+            System.out.println();
+            for(int i = 0; i < points[0].length; i++) {
+                drawPoint(graph, points[0][i], points[1][i]);
+            }
         }
 
         return blank_image;
@@ -419,11 +420,10 @@ public class Grapher {
      */
     public BufferedImage drawGraphOnGrid(BufferedImage grid, double[][] points) throws IndexOutOfBoundsException {
         setWidthHeight(grid);
-
         if(validateSettings()) {
             Graphics2D graph = grid.createGraphics();
             for(int i = 0; i < points[0].length; i++) {
-                plotPoint(graph, points[0][i], points[1][i]);
+                drawPoint(graph, points[0][i], points[1][i]);
             }
         }
 
@@ -447,7 +447,7 @@ public class Grapher {
         float units_per_pxl = (xMax - xMin) / width;
 
         for(double i = rangeLow; i <= rangeHigh; i += units_per_pxl) {
-            plotPoint(graph, i, calculate(i));
+            drawPoint(graph, i, calculate(i));
         }
 
         return grid;
@@ -464,18 +464,23 @@ public class Grapher {
      * @param yCoordinate y-coordinate of point being plotted
      * @return
      */
-    private Graphics2D plotPoint(Graphics2D graph, double xCoordinate, double yCoordinate) { // todo: height and width shouldn't be class variables. They should be specified when creating each graph individually
+    private Graphics2D drawPoint(Graphics2D graph, double xCoordinate, double yCoordinate) { // todo: height and width shouldn't be class variables. They should be specified when creating each graph individually
         /* Check to see if coordinates fall in graph range */
         if((xCoordinate >= xMin && xCoordinate <= xMax) && (yCoordinate >= yMin && yCoordinate <= yMax)) {
             /* Convert number coordinates to a coordinate on graph's user space */
             int[] px_coordinates = coordinateToPixel(xCoordinate, yCoordinate);
 
             if(plotStroke != null)
-                graph.setStroke(plotStroke); // todo: test
+                graph.setStroke(plotStroke); // todo: this should be set before to avoid resetting for every point
+            else
+                graph.setStroke(new BasicStroke(width * plotWidth));
+
             graph.setColor(plotColor);
 
             /* Draw a point with diameter = plotWidth at specified coordinates in userspace */
-            graph.fillOval(px_coordinates[0], px_coordinates[1], (int) (plotWidth / 2), (int) (plotWidth / 2));
+            graph.fillOval(px_coordinates[0], px_coordinates[1], (int) (width * plotWidth / 2), (int) (width * plotWidth / 2));
+
+            System.out.println("Drawing point at (" + px_coordinates[0] + "," + px_coordinates[1] + ")");
         }
 
         return graph;
