@@ -505,7 +505,7 @@ public class Grapher {
 
         /* For each dimension, calculate distance away from min value on the axis
          * and multiply by the pixels per unit ratio */
-        return new int[] {(int) ((xCoordinate - xMin) * x_px_unit), (int) ((yCoordinate - yMin) * y_px_unit)};
+        return new int[] {(int) ((xCoordinate - xMin) * x_px_unit), (int) (height - (yCoordinate - yMin) * y_px_unit)};
     }
 
     /**
@@ -521,7 +521,7 @@ public class Grapher {
         double x_unit_px = (xMax - xMin) / width;
         double y_unit_px = (yMax - yMin) / height;
 
-        return new double[] { xMin + (xPixel * x_unit_px), yMin + (yPixel * y_unit_px) };
+        return new double[] { xMin + (xPixel * x_unit_px), yMax - (yPixel * y_unit_px) };
     }
 
     /**
