@@ -9,13 +9,13 @@ public class Grapher {
 
     /**
      * The height, in pixels, of the graph to be generated.
-     * A minimum value of
+     * Must be greater than zero.
      */
     private int height;
 
     /**
      * The width, in pixels, of the graph to be generated.
-     * A minimum value of
+     * Must be greater than zero.
      */
     private int width;
 
@@ -164,16 +164,16 @@ public class Grapher {
      * Draws the grid, or background, for the function/points
      * to be plotted on graph. Fills in background color
      * of graph, draws grid lines (if drawGridLines = true),
-     * draws axis, and draws ticks (if drawTicks = true) using
-     * styles.
+     * draws axis, and draws ticks (if drawTicks = true).
      * @param blank_image blank BufferedImage for grid to be drawn on
      * @return blank_image with grid drawn on it
      */
-    public BufferedImage drawGrid(BufferedImage blank_image) { // todo: either pass as Graphics or createGraphics here
+    public BufferedImage drawGrid(BufferedImage blank_image) { // todo: not sure if this should be void or not
         setWidthHeight(blank_image);
 
+        Graphics2D graphics = blank_image.createGraphics();
+
         if(validateSettings()) {
-            Graphics2D graphics = blank_image.createGraphics();
             graphics = drawBackground(graphics);
             if (drawGridlines)
                 graphics = drawGridLines(graphics);
@@ -440,7 +440,7 @@ public class Grapher {
 
     /**
      * Converts coordinates of a point on the graph to coordinates of // todo: make sure height and width aren't greater than int limit (32765)
-     * that point on the userspace of the Graphics2D object where drawing
+     * that pixel on the userspace of the Graphics2D object where drawing
      * takes place.
      * Uses window settings and height and width fields. Errors will occur
      * if these settings are not up to date.
@@ -450,20 +450,31 @@ public class Grapher {
      * point's location in userspace
      */
     private int[] coordinateToPixel(double xCoordinate, double yCoordinate) {
-        /* Calculate "range" covered on each axis */
-        double x_range = xMax - xMin;
-        double y_range = yMax - yMin;
+        /* Calculate pixels per unit using the formula
+         * axis width (pixels) / axis range (units) */
+        double x_px_unit = width / (xMax - xMin);
+        double y_px_unit = height / (yMax - yMin);
 
-        /* Calculate pixels per unit */
-        double x_px_unit = width / x_range;
-        double y_px_unit = height / y_range;
-
+        /* For each dimension, calculate distance away from min value on the axis
+         * and multiply by the pixels per unit ratio */
         return new int[] {(int) ((xCoordinate - xMin) * x_px_unit), (int) ((yCoordinate - yMin) * y_px_unit)};
     }
 
-    //private long pixelToCoordinate(int xCoordinate, int yCoordinate) {
+    /**
+     * Converts coordinates of a pixel on the userspace to the
+     * coordinates of the point on that pixel on the graph.
+     * @param xPixel
+     * @param yPixel
+     * @return
+     */
+    private double[] pixelToCoordinate(int xPixel, int yPixel) {
+        /* Calculate units per pixel using the formula
+         * axis range (units) / axis width (pixels)*/
+        double x_unit_px = (xMax - xMin) / width;
+        double y_unit_px = (yMax - yMin) / height;
 
-    //}
+        return new double[] { xMin + (xPixel * x_unit_px), yMin + (yPixel * y_unit_px) };
+    }
 
     /**
      * Sets width and height fields based on specifications of
