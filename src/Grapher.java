@@ -56,25 +56,19 @@ public class Grapher {
     private boolean drawGridlines;
 
     /**
-     * Relative space between gridlines, if drawGridLines = true.
-     * On the x-axis, the absolute space (in pixels) is determined
-     * using the formula width * gridLineSpacing, and on the y-axis
-     * is determined by the formula height * gridLineSpacing.
+     * Units between gridlines, if drawGridLines = true.
      * Because ticks are only drawn where there are grid lines,
      * this setting also determines the spacing between ticks.
      */
-    private float gridLineSpacing;
+    private double gridLineSpacing;
 
     /**
-     * Relative thickness, or width, of each grid line, if
-     * drawGridLines = true. The absolute thickness (in pixels)
-     * of a grid line is determined using the formula
-     * width * gridLineThickness. Note that height is not used
-     * in this calculation.
+     * Thickness, or width, of each grid line, in pixels
+     * drawGridLines = true.
      * This setting also sets the thickness of ticks, if
      * drawTicks = true.
      */
-    private float gridLineThickness; // todo: maybe make this an absolute value?
+    private int gridLineThickness; // todo: maybe make this an absolute value?
     // todo: by default base other thicknesses relative to gridLineThickness
 
     /**
@@ -96,7 +90,7 @@ public class Grapher {
 
     private BasicStroke tickStroke;
 
-    private float tickLength;
+    private int tickLength;
 
     private boolean labelTicks;
 
@@ -118,14 +112,11 @@ public class Grapher {
     private BasicStroke axisStroke;
 
     /**
-     * Relative width of axis compared to width of graph.
-     * The absolute value in pixels is calculated with the
-     * formula width * axisWidth. Note that height is not
-     * used in this calculation.
+     * Thickness of line demarcating x- and y-axis, in pixels.
      */
-    private float axisWidth;
+    private int axisWidth;
 
-    private float plotWidth;
+    private int plotWidth;
 
     private Color plotColor;
 
@@ -142,20 +133,20 @@ public class Grapher {
         xMax = 10;
 
         drawGridlines = true;
-        gridLineSpacing = 0.03f;
-        gridLineThickness = 0.0025f;
+        gridLineSpacing = 1;
+        gridLineThickness = 1;
         gridLineColor = new Color(192, 192, 192);
 
         drawTicks = true;
-        tickLength = 0.0125f;
+        tickLength = 4;
         labelTicks = false;
 
         backgroundColor = Color.WHITE;
 
         axisColor = Color.BLACK;
-        axisWidth = 0.0025f;
+        axisWidth = 1;
 
-        plotWidth = 0.01f;
+        plotWidth = 5;
         plotColor = Color.BLACK;
     }
 
@@ -203,14 +194,15 @@ public class Grapher {
      * @return
      */
     private Graphics2D drawGridLines(Graphics2D graph) {
-        /* First, calculate absolute distance between gridlines (px) */
-        int spacing_x = (int) (width * gridLineSpacing);
-        int spacing_y = (int) (height * gridLineSpacing);
+        /* First, calculate absolute distance between gridlines (px)
+         * Use formula gridLineSpacing (units) * pixels per unit */
+        int spacing_x = (int) (gridLineSpacing * (width / (xMax - xMin)));
+        int spacing_y = (int) (gridLineSpacing * (height / (yMax - yMin)));
 
         if(gridLineStroke != null)
             graph.setStroke(gridLineStroke);
         else
-            graph.setStroke(new BasicStroke(width * gridLineThickness));
+            graph.setStroke(new BasicStroke(gridLineThickness));
 
         graph.setColor(gridLineColor);
 
@@ -253,7 +245,7 @@ public class Grapher {
         if(axisStroke != null)
             graph.setStroke(axisStroke);
         else
-            graph.setStroke(new BasicStroke(width * axisWidth));
+            graph.setStroke(new BasicStroke(axisWidth));
 
         graph.setColor(axisColor);
 
@@ -280,23 +272,21 @@ public class Grapher {
      * @return
      */
     private Graphics2D drawTicks(Graphics2D graph) {
-        /* Calculate absolute spacing between ticks (px) */
-        int spacing_x = (int) (width * gridLineSpacing);
-        int spacing_y = (int) (height * gridLineSpacing);
-
-        /* Calculate length of each tick based on image width */
-        int tick_length = (int) (width * tickLength);
+        /* First, calculate absolute distance between ticks (px)
+         * Use formula gridLineSpacing (units) * pixels per unit */
+        int spacing_x = (int) (gridLineSpacing * (width / (xMax - xMin)));
+        int spacing_y = (int) (gridLineSpacing * (height / (yMax - yMin)));
 
         /* Get location of origin in userspace */
         int[] origin = coordinateToPixel(0, 0);
 
         /* Calculate x-start and x-end coordinates of ticks on the y-axis */
-        int tick_end = origin[0] - tick_length;
+        int tick_end = origin[0] - tickLength;
 
         if(tickStroke != null) // todo: private void setStroke(Graphics2D, tickStroke, BasicStroke)
             graph.setStroke(tickStroke);
         else
-            graph.setStroke(new BasicStroke(width * gridLineThickness));
+            graph.setStroke(new BasicStroke(gridLineThickness));
 
         graph.setColor(axisColor);
 
@@ -313,7 +303,7 @@ public class Grapher {
         }
 
         /* Calculate y-start and y-end coordinates of ticks on the x-axis */
-        tick_end = origin[1] + tick_length;
+        tick_end = origin[1] + tickLength;
 
         /* Draw vertical ticks starting from origin and moving right along x-axis */ // todo: what if origin off-screen?
         for(int i = origin[1] + spacing_y; i < height; i += spacing_y) {
@@ -362,7 +352,7 @@ public class Grapher {
             throw new IndexOutOfBoundsException("width cannot be less than or equal to zero");
         //if(gridLineStroke.getLineWidth() > width || gridLineStroke.getLineWidth() > height)
         //    throw new IndexOutOfBoundsException("gridLineStroke LineWidth cannot be larger than width or height");
-        if(gridLineSpacing > 1)
+        /*if(gridLineSpacing > 1)
             throw new IndexOutOfBoundsException("gridLineSpacing cannot be greater than one");
         if(gridLineThickness > 1)
             throw new IndexOutOfBoundsException("gridLineThickness cannot be greater than one");
@@ -371,7 +361,7 @@ public class Grapher {
         if(axisWidth > 1)
             throw new IndexOutOfBoundsException("axisWidth cannot be greater than one");
         if(plotWidth > 1)
-            throw new IndexOutOfBoundsException("plotWidth cannot be greater than one");
+            throw new IndexOutOfBoundsException("plotWidth cannot be greater than one"); */
         return true;
     }
 
@@ -466,7 +456,7 @@ public class Grapher {
             int[] px_coordinates = coordinateToPixel(xCoordinate, yCoordinate);
 
             /* Draw a point with diameter = plotWidth at specified coordinates in userspace */
-            graph.fillOval(px_coordinates[0], px_coordinates[1], (int) (width * plotWidth / 2), (int) (width * plotWidth / 2));
+            graph.fillOval(px_coordinates[0], px_coordinates[1], plotWidth, plotWidth);
 
             System.out.println("Drawing point at (" + px_coordinates[0] + "," + px_coordinates[1] + ")");
         }
