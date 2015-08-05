@@ -193,7 +193,7 @@ public class Grapher {
      * @param graph Graphics2D object of graph being drawn
      * @return
      */
-    private Graphics2D drawGridLines(Graphics2D graph) {
+    private Graphics2D drawGridLines(Graphics2D graph) { // todo: gridlines don't line up with actual points
         /* First, calculate absolute distance between gridlines (px)
          * Use formula gridLineSpacing (units) * pixels per unit */
         int spacing_x = (int) (gridLineSpacing * (width / (xMax - xMin)));
@@ -220,7 +220,7 @@ public class Grapher {
             graph.draw(new Line2D.Double(0, i, width, i));
             System.out.println("Drawing gridLine from (0," + i + ") to (" + width + "," + i + ") in userspace");
         }
-
+        
         /* Draw horizontal grid lines starting from origin and moving down */
         for(int i = origin[1]; i < height; i += spacing_y) {
             graph.draw(new Line2D.Double(i, 0, i, height));
@@ -406,6 +406,8 @@ public class Grapher {
         if(validateSettings()) {
             Graphics2D graph = grid.createGraphics();
             graph.setColor(plotColor);
+            graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
             for(int i = 0; i < points[0].length; i++) {
                 drawPoint(graph, points[0][i], points[1][i]);
             }
@@ -428,6 +430,8 @@ public class Grapher {
         setWidthHeight(grid);
         Graphics2D graph = grid.createGraphics();
         graph.setColor(plotColor);
+        graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
 
         float units_per_pxl = (xMax - xMin) / width;
 
