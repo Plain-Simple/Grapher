@@ -74,7 +74,8 @@ public class Grapher {
      * This setting also sets the thickness of ticks, if
      * drawTicks = true.
      */
-    private float gridLineThickness;
+    private float gridLineThickness; // todo: maybe make this an absolute value?
+    // todo: by default base other thicknesses relative to gridLineThickness
 
     /**
      * Color of grid lines. // todo: specify default values
@@ -178,8 +179,8 @@ public class Grapher {
             if (drawGridlines)
                 graphics = drawGridLines(graphics);
             graphics = drawAxis(graphics);
-            //if (drawTicks)
-                //graphics = drawTicks(graphics);
+            if (drawTicks)
+                graphics = drawTicks(graphics);
         }
 
         return blank_image;
@@ -217,7 +218,6 @@ public class Grapher {
 
         /* Get coordinates of origin to draw out from there */
         int[] origin = coordinateToPixel(0, 0);
-        System.out.println("(0,0) -> (" + origin[0] + "," + origin[1] + ") in userspace");
 
         /* Draw vertical grid lines starting from origin and moving right */
         for(int i = origin[0]; i < width; i += spacing_x) {
@@ -268,7 +268,7 @@ public class Grapher {
 
         /* Draw y-axis */
         graph.draw(new Line2D.Double(origin[0], 0, origin[0], height));
-        System.out.println("Drawing axis from (" + origin[0] + ",0) to " + origin[0] + "," + height + ") in userspace");
+        System.out.println("Drawing axis from (" + origin[0] + ",0) to " + origin[0] + "," + height + ") in userspace\n");
 
         return graph;
     }
@@ -282,35 +282,53 @@ public class Grapher {
      * @return
      */
     private Graphics2D drawTicks(Graphics2D graph) {
-        if(tickStroke != null)
-            graph.setStroke(tickStroke);
-        else
-            graph.setStroke(new BasicStroke(width * gridLineThickness));
-
-        graph.setColor(axisColor);
-
-        /* Calculate spacing along x- and y-axis between individual
-         * ticks */
+        /* Calculate absolute spacing between ticks (px) */
         int spacing_x = (int) (width * gridLineSpacing);
         int spacing_y = (int) (height * gridLineSpacing);
 
         /* Calculate length of each tick based on image width */
         int tick_length = (int) (width * tickLength);
 
-        /* Calculate x-start and x-end coordinates of ticks on the y-axis */
-        int tick_start = width / 2 - tick_length / 2;
-        int tick_end = width / 2 + tick_length / 2;
+        /* Get location of origin in userspace */
+        int[] origin = coordinateToPixel(0, 0);
 
-        for(int i = spacing_x; i < width; i += spacing_x) { // todo: refactoring
-            graph.draw(new Line2D.Double(tick_start, i, tick_end, i));
+        /* Calculate x-start and x-end coordinates of ticks on the y-axis */
+        int tick_start = origin[0] - tick_length / 2;
+        int tick_end = origin[0] + tick_length / 2;
+
+        if(tickStroke != null) // todo: private void setStroke(Graphics2D, tickStroke, BasicStroke)
+            graph.setStroke(tickStroke);
+        else
+            graph.setStroke(new BasicStroke(width * gridLineThickness));
+
+        graph.setColor(axisColor);
+
+        /* Draw vertical ticks starting from origin and moving right along x-axis */ // todo: what if origin off-screen?
+        for(int i = origin[0] + spacing_x; i < width; i += spacing_x) {
+            graph.draw(new Line2D.Double(i, tick_start, i, tick_end));
+            System.out.println("Drawing tick from (" + i + "," + tick_start + ") to (" + i + "," + tick_end + ") in userspace");
+        }
+
+        /* Draw vertical ticks starting at origin and moving left along x-axis */ // todo: smarter, left to right, only for coordinates on screen
+        for(int i = origin[0] - spacing_x; i > 0; i -= spacing_x) {
+            graph.draw(new Line2D.Double(i, tick_start, i, tick_end));
+            System.out.println("Drawing tick from (" + i + "," + tick_start + ") to (" + i + "," + tick_end + ") in userspace");
         }
 
         /* Calculate y-start and y-end coordinates of ticks on the x-axis */
-        tick_start = height / 2 + tick_length / 2;
-        tick_end = height / 2 - tick_length / 2;
+        tick_start = origin[1] + tick_length / 2;
+        tick_end = origin[1] - tick_length / 2;
 
-        for(int i = spacing_y; i < height; i += spacing_y) {
-            graph.draw(new Line2D.Double(i, tick_start, i, tick_end));
+        /* Draw vertical ticks starting from origin and moving right along x-axis */ // todo: what if origin off-screen?
+        for(int i = origin[1] + spacing_y; i < height; i += spacing_y) {
+            graph.draw(new Line2D.Double(tick_start, i, tick_end, i));
+            System.out.println("Drawing tick from (" + tick_start + "," + i + ") to (" + tick_end + "," + i + ") in userspace");
+        }
+
+        /* Draw vertical ticks starting at origin and moving left along x-axis */
+        for(int i = origin[1] - spacing_y; i > 0; i -= spacing_y) {
+            graph.draw(new Line2D.Double(tick_start, i, tick_end, i));
+            System.out.println("Drawing tick from (" + tick_start + "," + i + ") to (" + tick_end + "," + i + ") in userspace");
         }
 
         return graph;
