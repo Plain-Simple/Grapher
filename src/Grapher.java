@@ -168,18 +168,18 @@ public class Grapher {
      * @param blank_image blank BufferedImage for grid to be drawn on
      * @return blank_image with grid drawn on it
      */
-    public BufferedImage drawGrid(BufferedImage blank_image) { // todo: not sure if this should be void or not
+    public BufferedImage drawGrid(BufferedImage blank_image) {
         setWidthHeight(blank_image);
 
         Graphics2D graphics = blank_image.createGraphics();
 
         if(validateSettings()) {
-            graphics = drawBackground(graphics);
+            graphics = drawBackground(graphics); // todo: change to void
             if (drawGridlines)
                 graphics = drawGridLines(graphics);
-            graphics = drawAxis(graphics);
-            if (drawTicks)
-                graphics = drawTicks(graphics);
+            //graphics = drawAxis(graphics);
+            //if (drawTicks)
+                //graphics = drawTicks(graphics);
         }
 
         return blank_image;
@@ -204,8 +204,7 @@ public class Grapher {
      * @return
      */
     private Graphics2D drawGridLines(Graphics2D graph) {
-        /* First, calculate distance between gridlines using image
-         * height and width and range to display. */
+        /* First, calculate absolute distance between gridlines (px) */
         int spacing_x = (int) (width * gridLineSpacing);
         int spacing_y = (int) (height * gridLineSpacing);
 
@@ -216,14 +215,32 @@ public class Grapher {
 
         graph.setColor(gridLineColor);
 
-        /* Draw vertical grid lines */
-        for(int i = spacing_x; i < width; i += spacing_x) {
-            graph.draw(new Line2D.Double(i, 0, i, height));
+        /* Get coordinates of origin to draw out from there */
+        int[] origin = coordinateToPixel(0, 0);
+        System.out.println("(0,0) -> (" + origin[0] + "," + origin[1] + ") in userspace");
+
+        /* Draw vertical grid lines starting from origin and moving right */
+        for(int i = origin[0]; i < width; i += spacing_x) {
+            graph.draw(new Line2D.Double(0, i, width, i));
+            System.out.println("Drawing line from (0," + i + ") to (" + width + "," + i + ") in userspace");
         }
 
-        /* Draw horizontal grid lines */
-        for(int i = spacing_y; i < height; i += spacing_y) {
-            graph.draw(new Line2D.Double(0, i, 0, width));
+        /* Draw vertical grid lines starting from origin and moving left */
+        for(int i = origin[0]; i > 0; i -= spacing_x) {
+            graph.draw(new Line2D.Double(0, i, width, i));
+            System.out.println("Drawing line from (0," + i + ") to (" + width + "," + i + ") in userspace");
+        }
+
+        /* Draw horizontal grid lines starting from origin and moving down */
+        for(int i = origin[1]; i < height; i += spacing_y) {
+            graph.draw(new Line2D.Double(i, 0, i, height));
+            System.out.println("Drawing line from (" + i + ",0) to (" + i + "," + height + ") in userspace");
+        }
+
+        /* Draw horizontal grid lines starting from origin and moving up */
+        for(int i = origin[1]; i > 0; i -= spacing_y) {
+            graph.draw(new Line2D.Double(i, 0, i, height));
+            System.out.println("Drawing line from (" + i + ",0) to (" + i + "," + height + ") in userspace");
         }
 
         return graph;
@@ -353,11 +370,11 @@ public class Grapher {
         setWidthHeight(blank_image);
 
         if(validateSettings()) {
-            Graphics2D graph = blank_image.createGraphics();
-            drawBackground(graph);
-            for(int i = 0; i < points[0].length; i++) {
-                plotPoint(graph, points[0][i], points[1][i]);
-            }
+            //Graphics2D graph = blank_image.createGraphics();
+            drawGrid(blank_image);
+            //for(int i = 0; i < points[0].length; i++) {
+            //    plotPoint(graph, points[0][i], points[1][i]);
+            //}
         }
 
         return blank_image;
@@ -439,7 +456,7 @@ public class Grapher {
     }
 
     /**
-     * Converts coordinates of a point on the graph to coordinates of // todo: make sure height and width aren't greater than int limit (32765)
+     * Converts coordinates of a point on the graph to coordinates of // todo: make sure ratio of pixels to units isn't > int limit (32765)
      * that pixel on the userspace of the Graphics2D object where drawing
      * takes place.
      * Uses window settings and height and width fields. Errors will occur
