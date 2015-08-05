@@ -174,12 +174,12 @@ public class Grapher {
 
         if(validateSettings()) {
             Graphics2D graphics = blank_image.createGraphics();
-            drawBackground(graphics);
+            graphics = drawBackground(graphics);
             if (drawGridlines)
-                drawGridLines(graphics);
-            drawAxis(graphics);
+                graphics = drawGridLines(graphics);
+            graphics = drawAxis(graphics);
             if (drawTicks)
-                drawTicks(graphics);
+                graphics = drawTicks(graphics);
         }
 
         return blank_image;
@@ -189,17 +189,20 @@ public class Grapher {
      * Sets background color of graph using the backgroundColor
      * field.
      * @param graph Graphics2D object of graph being drawn
+     * @return
      */
-    private void drawBackground(Graphics2D graph) {
+    private Graphics2D drawBackground(Graphics2D graph) {
         graph.setBackground(backgroundColor);
+        return graph;
     }
 
     /**
      * Uses class-defined settings to draw horizontal and vertical
      * grid lines on the BufferedImage.
      * @param graph Graphics2D object of graph being drawn
+     * @return
      */
-    private void drawGridLines(Graphics2D graph) {
+    private Graphics2D drawGridLines(Graphics2D graph) {
         /* First, calculate distance between gridlines using image
          * height and width and range to display. */
         int spacing_x = (int) (width * gridLineSpacing);
@@ -221,13 +224,16 @@ public class Grapher {
         for(int i = spacing_y; i < height; i += spacing_y) {
             graph.draw(new Line2D.Double(0, i, 0, width));
         }
+
+        return graph;
     }
 
     /**
      *
      * @param graph
+     * @return
      */
-    private void drawAxis(Graphics2D graph) { // todo: axis may not be centered
+    private Graphics2D drawAxis(Graphics2D graph) { // todo: axis may not be centered
         if(axisStroke != null)
             graph.setStroke(axisStroke);
         else
@@ -237,6 +243,8 @@ public class Grapher {
 
         graph.draw(new Line2D.Double(width / 2, 0, width / 2, height));
         graph.draw(new Line2D.Double(0, height / 2, width, height / 2));
+
+        return graph;
     }
 
     /**
@@ -245,8 +253,9 @@ public class Grapher {
      * axisColor to determine color of ticks that are drawn,
      * and tickStroke to style the ticks.
      * @param graph
+     * @return
      */
-    private void drawTicks(Graphics2D graph) {
+    private Graphics2D drawTicks(Graphics2D graph) {
         if(tickStroke != null)
             graph.setStroke(tickStroke);
         else
@@ -277,6 +286,8 @@ public class Grapher {
         for(int i = spacing_y; i < height; i += spacing_y) {
             graph.draw(new Line2D.Double(i, tick_start, i, tick_end));
         }
+
+        return graph;
     }
 
     /**
@@ -407,8 +418,9 @@ public class Grapher {
      * @param graph Graphics2D object of graph being drawn on
      * @param xCoordinate x-coordinate of point being plotted
      * @param yCoordinate y-coordinate of point being plotted
+     * @return
      */
-    private void plotPoint(Graphics2D graph, double xCoordinate, double yCoordinate) { // todo: height and width shouldn't be class variables. They should be specified when creating each graph individually
+    private Graphics2D plotPoint(Graphics2D graph, double xCoordinate, double yCoordinate) { // todo: height and width shouldn't be class variables. They should be specified when creating each graph individually
         /* Check to see if coordinates fall in graph range */
         if((xCoordinate >= xMin && xCoordinate <= xMax) && (yCoordinate >= yMin && yCoordinate <= yMax)) {
             /* Convert number coordinates to a coordinate on graph's user space */
@@ -421,6 +433,8 @@ public class Grapher {
             /* Draw a point with diameter = plotWidth at specified coordinates in userspace */
             graph.fillOval(px_coordinates[0], px_coordinates[1], (int) (plotWidth / 2), (int) (plotWidth / 2));
         }
+
+        return graph;
     }
 
     /**
