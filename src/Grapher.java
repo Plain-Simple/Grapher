@@ -177,7 +177,7 @@ public class Grapher {
             graphics = drawBackground(graphics); // todo: change to void
             if (drawGridlines)
                 graphics = drawGridLines(graphics);
-            //graphics = drawAxis(graphics);
+            graphics = drawAxis(graphics);
             //if (drawTicks)
                 //graphics = drawTicks(graphics);
         }
@@ -222,25 +222,25 @@ public class Grapher {
         /* Draw vertical grid lines starting from origin and moving right */
         for(int i = origin[0]; i < width; i += spacing_x) {
             graph.draw(new Line2D.Double(0, i, width, i));
-            System.out.println("Drawing line from (0," + i + ") to (" + width + "," + i + ") in userspace");
+            System.out.println("Drawing gridLine from (0," + i + ") to (" + width + "," + i + ") in userspace");
         }
 
         /* Draw vertical grid lines starting from origin and moving left */
         for(int i = origin[0]; i > 0; i -= spacing_x) {
             graph.draw(new Line2D.Double(0, i, width, i));
-            System.out.println("Drawing line from (0," + i + ") to (" + width + "," + i + ") in userspace");
+            System.out.println("Drawing gridLine from (0," + i + ") to (" + width + "," + i + ") in userspace");
         }
 
         /* Draw horizontal grid lines starting from origin and moving down */
         for(int i = origin[1]; i < height; i += spacing_y) {
             graph.draw(new Line2D.Double(i, 0, i, height));
-            System.out.println("Drawing line from (" + i + ",0) to (" + i + "," + height + ") in userspace");
+            System.out.println("Drawing gridLine from (" + i + ",0) to (" + i + "," + height + ") in userspace");
         }
 
         /* Draw horizontal grid lines starting from origin and moving up */
         for(int i = origin[1]; i > 0; i -= spacing_y) {
             graph.draw(new Line2D.Double(i, 0, i, height));
-            System.out.println("Drawing line from (" + i + ",0) to (" + i + "," + height + ") in userspace");
+            System.out.println("Drawing gridLine from (" + i + ",0) to (" + i + "," + height + ") in userspace");
         }
 
         return graph;
@@ -259,8 +259,16 @@ public class Grapher {
 
         graph.setColor(axisColor);
 
-        graph.draw(new Line2D.Double(width / 2, 0, width / 2, height));
-        graph.draw(new Line2D.Double(0, height / 2, width, height / 2));
+        /* Find location of origin in userspace */
+        int[] origin = coordinateToPixel(0, 0);
+
+        /* Draw x-axis */
+        graph.draw(new Line2D.Double(0, origin[1], width, origin[1]));
+        System.out.println("\nDrawing axis from (0," + origin[1] + ") to (" + width + "," + origin[1] + ") in userspace");
+
+        /* Draw y-axis */
+        graph.draw(new Line2D.Double(origin[0], 0, origin[0], height));
+        System.out.println("Drawing axis from (" + origin[0] + ",0) to " + origin[0] + "," + height + ") in userspace");
 
         return graph;
     }
