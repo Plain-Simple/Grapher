@@ -176,10 +176,10 @@ public class Grapher {
             Graphics2D graphics = blank_image.createGraphics();
             drawBackground(graphics);
             if (drawGridlines)
-                drawGridLines(graphics, width, height);
-            drawAxis(graphics, width, height);
+                drawGridLines(graphics);
+            drawAxis(graphics);
             if (drawTicks)
-                drawTicks(graphics, width, height);
+                drawTicks(graphics);
         }
 
         return blank_image;
@@ -198,43 +198,45 @@ public class Grapher {
      * Uses class-defined settings to draw horizontal and vertical
      * grid lines on the BufferedImage.
      * @param graph Graphics2D object of graph being drawn
-     * @param biWidth width of graph being drawn, in pixels
-     * @param biHeight height of graph being drawn, in pixels
      */
-    private void drawGridLines(Graphics2D graph, int biWidth, int biHeight) {
+    private void drawGridLines(Graphics2D graph) {
         /* First, calculate distance between gridlines using image
          * height and width and range to display. */
-        int spacing_x = (int) (biWidth * gridLineSpacing);
-        int spacing_y = (int) (biHeight * gridLineSpacing);
+        int spacing_x = (int) (width * gridLineSpacing);
+        int spacing_y = (int) (height * gridLineSpacing);
 
         if(gridLineStroke != null)
             graph.setStroke(gridLineStroke);
+        else
+            graph.setStroke(new BasicStroke(width * gridLineThickness));
+
         graph.setColor(gridLineColor);
 
         /* Draw vertical grid lines */
-        for(int i = spacing_x; i < biWidth; i += spacing_x) {
-            graph.draw(new Line2D.Double(i, 0, i, biHeight));
+        for(int i = spacing_x; i < width; i += spacing_x) {
+            graph.draw(new Line2D.Double(i, 0, i, height));
         }
 
         /* Draw horizontal grid lines */
-        for(int i = spacing_y; i < biHeight; i += spacing_y) {
-            graph.draw(new Line2D.Double(0, i, 0, biWidth));
+        for(int i = spacing_y; i < height; i += spacing_y) {
+            graph.draw(new Line2D.Double(0, i, 0, width));
         }
     }
 
     /**
      *
      * @param graph
-     * @param biWidth
-     * @param biHeight
      */
-    private void drawAxis(Graphics2D graph, int biWidth, int biHeight) { // todo: axis may not be centered
+    private void drawAxis(Graphics2D graph) { // todo: axis may not be centered
         if(axisStroke != null)
             graph.setStroke(axisStroke);
+        else
+            graph.setStroke(new BasicStroke(width * axisWidth));
+
         graph.setColor(axisColor);
 
-        graph.draw(new Line2D.Double(biWidth / 2, 0, biWidth / 2, biHeight));
-        graph.draw(new Line2D.Double(0, biHeight / 2, biWidth, biHeight / 2));
+        graph.draw(new Line2D.Double(width / 2, 0, width / 2, height));
+        graph.draw(new Line2D.Double(0, height / 2, width, height / 2));
     }
 
     /**
@@ -244,32 +246,35 @@ public class Grapher {
      * and tickStroke to style the ticks.
      * @param graph
      */
-    private void drawTicks(Graphics2D graph, int biWidth, int biHeight) {
+    private void drawTicks(Graphics2D graph) {
         if(tickStroke != null)
             graph.setStroke(tickStroke);
+        else
+            graph.setStroke(new BasicStroke(width * gridLineThickness));
+
         graph.setColor(axisColor);
 
         /* Calculate spacing along x- and y-axis between individual
          * ticks */
-        int spacing_x = (int) (biWidth * gridLineSpacing);
-        int spacing_y = (int) (biHeight * gridLineSpacing);
+        int spacing_x = (int) (width * gridLineSpacing);
+        int spacing_y = (int) (height * gridLineSpacing);
 
         /* Calculate length of each tick based on image width */
-        int tick_length = (int) (biWidth * tickLength);
+        int tick_length = (int) (width * tickLength);
 
         /* Calculate x-start and x-end coordinates of ticks on the y-axis */
-        int tick_start = biWidth / 2 - tick_length / 2;
-        int tick_end = biWidth / 2 + tick_length / 2;
+        int tick_start = width / 2 - tick_length / 2;
+        int tick_end = width / 2 + tick_length / 2;
 
-        for(int i = spacing_x; i < biWidth; i += spacing_x) { // todo: refactoring
+        for(int i = spacing_x; i < width; i += spacing_x) { // todo: refactoring
             graph.draw(new Line2D.Double(tick_start, i, tick_end, i));
         }
 
         /* Calculate y-start and y-end coordinates of ticks on the x-axis */
-        tick_start = biHeight / 2 + tick_length / 2;
-        tick_end = biHeight / 2 - tick_length / 2;
+        tick_start = height / 2 + tick_length / 2;
+        tick_end = height / 2 - tick_length / 2;
 
-        for(int i = spacing_y; i < biHeight; i += spacing_y) {
+        for(int i = spacing_y; i < height; i += spacing_y) {
             graph.draw(new Line2D.Double(i, tick_start, i, tick_end));
         }
     }
