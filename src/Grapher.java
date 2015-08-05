@@ -125,8 +125,6 @@ public class Grapher {
      */
     private float axisWidth;
 
-    private BasicStroke plotStroke; // todo: is plotWidth redundant if plotStroke already sets width of pixels to draw?
-
     private float plotWidth;
 
     private Color plotColor;
@@ -144,21 +142,21 @@ public class Grapher {
         xMax = 10;
 
         drawGridlines = true;
-        gridLineSpacing = 0.10f;
-        gridLineThickness = 0.01f;
-        gridLineColor = Color.BLUE;
+        gridLineSpacing = 0.03f;
+        gridLineThickness = 0.0025f;
+        gridLineColor = new Color(192, 192, 192);
 
         drawTicks = true;
-        tickLength = 0.10f;
+        tickLength = 0.0125f;
         labelTicks = false;
 
         backgroundColor = Color.WHITE;
 
         axisColor = Color.BLACK;
-        axisWidth = 0.02f;
+        axisWidth = 0.0025f;
 
-        plotWidth = 0.05f;
-        plotColor = Color.RED;
+        plotWidth = 0.01f;
+        plotColor = Color.BLACK;
     }
 
     /**
@@ -293,8 +291,7 @@ public class Grapher {
         int[] origin = coordinateToPixel(0, 0);
 
         /* Calculate x-start and x-end coordinates of ticks on the y-axis */
-        int tick_start = origin[0] - tick_length / 2;
-        int tick_end = origin[0] + tick_length / 2;
+        int tick_end = origin[0] - tick_length;
 
         if(tickStroke != null) // todo: private void setStroke(Graphics2D, tickStroke, BasicStroke)
             graph.setStroke(tickStroke);
@@ -305,30 +302,29 @@ public class Grapher {
 
         /* Draw vertical ticks starting from origin and moving right along x-axis */ // todo: what if origin off-screen?
         for(int i = origin[0] + spacing_x; i < width; i += spacing_x) {
-            graph.draw(new Line2D.Double(i, tick_start, i, tick_end));
-            System.out.println("Drawing tick from (" + i + "," + tick_start + ") to (" + i + "," + tick_end + ") in userspace");
+            graph.draw(new Line2D.Double(i, origin[0], i, tick_end));
+            System.out.println("Drawing tick from (" + i + "," + origin[0] + ") to (" + i + "," + tick_end + ") in userspace");
         }
 
         /* Draw vertical ticks starting at origin and moving left along x-axis */ // todo: smarter, left to right, only for coordinates on screen
         for(int i = origin[0] - spacing_x; i > 0; i -= spacing_x) {
-            graph.draw(new Line2D.Double(i, tick_start, i, tick_end));
-            System.out.println("Drawing tick from (" + i + "," + tick_start + ") to (" + i + "," + tick_end + ") in userspace");
+            graph.draw(new Line2D.Double(i, origin[0], i, tick_end));
+            System.out.println("Drawing tick from (" + i + "," + origin[0] + ") to (" + i + "," + tick_end + ") in userspace");
         }
 
         /* Calculate y-start and y-end coordinates of ticks on the x-axis */
-        tick_start = origin[1] + tick_length / 2;
-        tick_end = origin[1] - tick_length / 2;
+        tick_end = origin[1] + tick_length;
 
         /* Draw vertical ticks starting from origin and moving right along x-axis */ // todo: what if origin off-screen?
         for(int i = origin[1] + spacing_y; i < height; i += spacing_y) {
-            graph.draw(new Line2D.Double(tick_start, i, tick_end, i));
-            System.out.println("Drawing tick from (" + tick_start + "," + i + ") to (" + tick_end + "," + i + ") in userspace");
+            graph.draw(new Line2D.Double(origin[1], i, tick_end, i));
+            System.out.println("Drawing tick from (" + origin[1] + "," + i + ") to (" + tick_end + "," + i + ") in userspace");
         }
 
         /* Draw vertical ticks starting at origin and moving left along x-axis */
         for(int i = origin[1] - spacing_y; i > 0; i -= spacing_y) {
-            graph.draw(new Line2D.Double(tick_start, i, tick_end, i));
-            System.out.println("Drawing tick from (" + tick_start + "," + i + ") to (" + tick_end + "," + i + ") in userspace");
+            graph.draw(new Line2D.Double(origin[1], i, tick_end, i));
+            System.out.println("Drawing tick from (" + origin[1] + "," + i + ") to (" + tick_end + "," + i + ") in userspace");
         }
 
         return graph;
@@ -397,11 +393,8 @@ public class Grapher {
 
         if(validateSettings()) {
             blank_image = drawGrid(blank_image);
-            Graphics2D graph = blank_image.createGraphics();
             System.out.println();
-            for(int i = 0; i < points[0].length; i++) {
-                drawPoint(graph, points[0][i], points[1][i]);
-            }
+            return drawGraphOnGrid(blank_image, points);
         }
 
         return blank_image;
@@ -422,6 +415,7 @@ public class Grapher {
         setWidthHeight(grid);
         if(validateSettings()) {
             Graphics2D graph = grid.createGraphics();
+            graph.setColor(plotColor);
             for(int i = 0; i < points[0].length; i++) {
                 drawPoint(graph, points[0][i], points[1][i]);
             }
@@ -443,6 +437,7 @@ public class Grapher {
     public BufferedImage drawGraphOnGrid(BufferedImage grid, double rangeLow, double rangeHigh) { // todo: exclusive v. inclusive points
         setWidthHeight(grid);
         Graphics2D graph = grid.createGraphics();
+        graph.setColor(plotColor);
 
         float units_per_pxl = (xMax - xMin) / width;
 
@@ -464,18 +459,11 @@ public class Grapher {
      * @param yCoordinate y-coordinate of point being plotted
      * @return
      */
-    private Graphics2D drawPoint(Graphics2D graph, double xCoordinate, double yCoordinate) { // todo: height and width shouldn't be class variables. They should be specified when creating each graph individually
+    private Graphics2D drawPoint(Graphics2D graph, double xCoordinate, double yCoordinate) {
         /* Check to see if coordinates fall in graph range */
         if((xCoordinate >= xMin && xCoordinate <= xMax) && (yCoordinate >= yMin && yCoordinate <= yMax)) {
             /* Convert number coordinates to a coordinate on graph's user space */
             int[] px_coordinates = coordinateToPixel(xCoordinate, yCoordinate);
-
-            if(plotStroke != null)
-                graph.setStroke(plotStroke); // todo: this should be set before to avoid resetting for every point
-            else
-                graph.setStroke(new BasicStroke(width * plotWidth));
-
-            graph.setColor(plotColor);
 
             /* Draw a point with diameter = plotWidth at specified coordinates in userspace */
             graph.fillOval(px_coordinates[0], px_coordinates[1], (int) (width * plotWidth / 2), (int) (width * plotWidth / 2));
