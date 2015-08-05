@@ -192,7 +192,8 @@ public class Grapher {
      * @return
      */
     private Graphics2D drawBackground(Graphics2D graph) {
-        graph.setBackground(backgroundColor);
+        graph.setColor(backgroundColor);
+        graph.fillRect(0, 0, width, height);
         return graph;
     }
 
