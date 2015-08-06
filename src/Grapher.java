@@ -106,9 +106,10 @@ public class Grapher {
 
     private Color plotColor;
 
+    private Font labelFont;
+
     // todo: check that range makes sense; Add documentation
     // todo: allow user to set BasicStrokes for components
-    // todo: set gridlines using relative value (e.g. 10% of width)
     /**
      * Default constructor. Sets all values to default values.
      */
@@ -151,10 +152,10 @@ public class Grapher {
         Graphics2D graphics = blank_image.createGraphics();
 
         if(validateSettings()) {
-            graphics = drawBackground(graphics); // todo: change to void
+            drawBackground(graphics);
             if (drawGridlines)
-                graphics = drawGridLines(graphics);
-            graphics = drawAxis(graphics);
+                drawGridLines(graphics);
+            drawAxis(graphics);
         }
 
         return blank_image;
@@ -164,21 +165,18 @@ public class Grapher {
      * Sets background color of graph using the backgroundColor
      * field.
      * @param graph Graphics2D object of graph being drawn
-     * @return
      */
-    private Graphics2D drawBackground(Graphics2D graph) {
+    private void drawBackground(Graphics2D graph) {
         graph.setColor(backgroundColor);
         graph.fillRect(0, 0, width, height);
-        return graph;
     }
 
     /**
      * Uses class-defined settings to draw horizontal and vertical
      * grid lines on the BufferedImage.
      * @param graph Graphics2D object of graph being drawn
-     * @return
      */
-    private Graphics2D drawGridLines(Graphics2D graph) {
+    private void drawGridLines(Graphics2D graph) {
         graph.setStroke(gridLineStroke);
         graph.setColor(gridLineColor);
 
@@ -199,8 +197,6 @@ public class Grapher {
             graph.draw(new Line2D.Double(i, 0, i, height));
             System.out.println("Drawing gridLine from (" + i + ",0) to (" + i + "," + height + ")");
         }
-
-        return graph;
     }
 
     /**
@@ -252,7 +248,7 @@ public class Grapher {
      * @param graph
      * @return
      */
-    private Graphics2D drawAxis(Graphics2D graph) {
+    private void drawAxis(Graphics2D graph) {
         graph.setStroke(axisStroke);
         graph.setColor(axisColor);
 
@@ -267,7 +263,7 @@ public class Grapher {
             System.out.println("\nDrawing axis from (" + start_x[0] + "," + start_x[1] + ") to (" + end_x[0] + "," + end_x[1] + ")");
 
             if(drawGridlines) {
-                /* Get starting y-coordinate of gridline and spacing */
+                /* Get starting coordinate of first horizontal gridline and spacing */
                 int start_y = getFirstXGridLine();
                 int spacing_x = getXGridLineSpacing();
 
@@ -289,18 +285,23 @@ public class Grapher {
             System.out.println("\nDrawing axis from (" + start_y[0] + "," + start_y[1] + ") to (" + end_y[0] + "," + end_y[1] + ")");
 
             if(drawGridlines) {
-                /* Get starting x-coordinate of gridline and spacing */
+                /* Get starting x-coordinate of first vertical gridline and spacing */
                 int start_x = getFirstYGridLine();
                 int spacing_y = getYGridLineSpacing();
 
                 for(int i = start_x; i < width; i += spacing_y) {
                     graph.draw(new Line2D.Double(i, start_y[1], i, start_y[1] - tickLength));
                     System.out.println("Drawing tick from (" + i + "," + start_y[1] + ") to (" + i + "," + (start_y[1] - tickLength) + ")");
+
                 }
             }
         }
+    }
 
-        return graph;
+    private void drawCenteredString(Graphics g, String s, int xCoordinate, int yCoordinate) {
+        g.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        FontMetrics fm = g.getFontMetrics();
+        g.drawString(s, xCoordinate - fm.stringWidth(s) / 2, yCoordinate + fm.getHeight());
     }
 
     /**
