@@ -185,7 +185,7 @@ public class Grapher {
         graph.setColor(gridLineColor);
 
         int start_x = getFirstXGridLine();
-        int spacing_x = (int) (gridLineSpacing * (width / (xMax - xMin)));
+        int spacing_x = getXGridLineSpacing();
 
         /* Draw horizontal grid lines starting from start_x and moving down */
         for(int i = start_x; i < height; i += spacing_x) {
@@ -194,8 +194,8 @@ public class Grapher {
         }
 
         int start_y = getFirstYGridLine();
-        int spacing_y = (int) (gridLineSpacing * (height / (yMax - yMin)));
-        
+        int spacing_y = getYGridLineSpacing();
+
         /* Draw vertical grid lines starting from start_y and moving right */
         for(int i = start_y; i < width; i += spacing_y) {
             graph.draw(new Line2D.Double(i, 0, i, height));
@@ -212,17 +212,13 @@ public class Grapher {
      * @return
      */
     private int getFirstXGridLine() {
-        /* Calculate absolute distance between gridlines (px)
-         * Use formula gridLineSpacing (units) * pixels per unit */
-        int spacing_x = (int) (gridLineSpacing * (width / (xMax - xMin)));
-
         /* Calculate how many "periods" from the minimum values of the graph to
          * the first gridline shown ON THE GRAPH. e.g. xMin = 10.8,
          * gridLineSpacing = 1 -> 0.2 periods to first gridline */
         double x_period_left = 1 - xMin % gridLineSpacing;
 
         /* Calculate where first gridlines will be */
-        return (int) (x_period_left * spacing_x);
+        return (int) (x_period_left * getXGridLineSpacing());
     }
 
     /**
@@ -232,17 +228,25 @@ public class Grapher {
      * @return
      */
     private int getFirstYGridLine() {
-        /* First, calculate absolute distance between gridlines (px)
-         * Use formula gridLineSpacing (units) * pixels per unit */
-        int spacing_y = (int) (gridLineSpacing * (height / (yMax - yMin)));
-
         /* Calculate how many "periods" from the minimum values of the graph to // todo: make a function?
          * the first gridline shown ON THE GRAPH. e.g. xMin = 10.8,
          * gridLineSpacing = 1 -> 0.2 periods to first gridline */
         double y_period_left = 1 -yMin % gridLineSpacing;
 
         /* Calculate where first gridlines will be */
-        return (int) (y_period_left * spacing_y);
+        return (int) (y_period_left * getYGridLineSpacing());
+    }
+
+    /* Calculates distance between vertical gridlines (px) */
+    private int getXGridLineSpacing() {
+        /* gridLineSpacing (units) * pixels per unit */
+        return (int) (gridLineSpacing * (width / (xMax - xMin)));
+    }
+
+    /* Calculates distance between horizontal gridlines (px) */
+    private int getYGridLineSpacing() {
+        /* gridLineSpacing (units) * pixels per unit */
+        return (int) (gridLineSpacing * (height / (yMax - yMin)));
     }
 
     /**
@@ -263,6 +267,10 @@ public class Grapher {
             /* Draw y-axis */
             graph.draw(new Line2D.Double(start_x[0], start_x[1], end_x[0], end_x[1]));
             System.out.println("\nDrawing axis from (" + start_x[0] + "," + start_x[1] + ") to (" + end_x[0] + "," + end_x[1] + ") in userspace");
+
+            if(drawGridlines) {
+
+            }
         }
 
         /* Draw x-axis if y = 0 is found on the graph */
