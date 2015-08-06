@@ -178,7 +178,7 @@ public class Grapher {
      * @param graph Graphics2D object of graph being drawn
      * @return
      */
-    private Graphics2D drawGridLines(Graphics2D graph) { // todo: gridlines don't line up with actual points
+    private Graphics2D drawGridLines(Graphics2D graph) {
         graph.setStroke(gridLineStroke);
         graph.setColor(gridLineColor);
 
@@ -188,7 +188,7 @@ public class Grapher {
         /* Draw horizontal grid lines starting from start_x and moving down */
         for(int i = start_x; i < height; i += spacing_x) {
             graph.draw(new Line2D.Double(0, i, width, i));
-            System.out.println("Drawing gridLine from (0," + i + ") to (" + width + "," + i + ") in userspace");
+            System.out.println("Drawing gridLine from (0," + i + ") to (" + width + "," + i + ")");
         }
 
         int start_y = getFirstYGridLine();
@@ -197,7 +197,7 @@ public class Grapher {
         /* Draw vertical grid lines starting from start_y and moving right */
         for(int i = start_y; i < width; i += spacing_y) {
             graph.draw(new Line2D.Double(i, 0, i, height));
-            System.out.println("Drawing gridLine from (" + i + ",0) to (" + i + "," + height + ") in userspace");
+            System.out.println("Drawing gridLine from (" + i + ",0) to (" + i + "," + height + ")");
         }
 
         return graph;
@@ -215,7 +215,7 @@ public class Grapher {
          * gridLineSpacing = 1 -> 0.2 periods to first gridline */
         double x_period_left = 1 - xMin % gridLineSpacing;
 
-        /* Calculate where first gridlines will be */
+        /* Calculate where first gridline will be */
         return (int) (x_period_left * getXGridLineSpacing());
     }
 
@@ -229,20 +229,20 @@ public class Grapher {
         /* Calculate how many "periods" from the minimum values of the graph to // todo: make a function?
          * the first gridline shown ON THE GRAPH. e.g. xMin = 10.8,
          * gridLineSpacing = 1 -> 0.2 periods to first gridline */
-        double y_period_left = 1 -yMin % gridLineSpacing;
+        double y_period_left = 1 - yMin % gridLineSpacing;
 
         /* Calculate where first gridlines will be */
         return (int) (y_period_left * getYGridLineSpacing());
     }
 
     /* Calculates distance between vertical gridlines (px) */
-    private int getXGridLineSpacing() {
+    private int getYGridLineSpacing() {
         /* gridLineSpacing (units) * pixels per unit */
         return (int) (gridLineSpacing * (width / (xMax - xMin)));
     }
 
     /* Calculates distance between horizontal gridlines (px) */
-    private int getYGridLineSpacing() {
+    private int getXGridLineSpacing() {
         /* gridLineSpacing (units) * pixels per unit */
         return (int) (gridLineSpacing * (height / (yMax - yMin)));
     }
