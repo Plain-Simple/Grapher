@@ -129,8 +129,8 @@ public class Grapher {
     public Grapher() {
         yMin = -10;
         yMax = 10;
-        xMin = -10;
-        xMax = 10;
+        xMin = 10;
+        xMax = 20;
 
         drawGridlines = true;
         gridLineSpacing = 1;
@@ -146,7 +146,7 @@ public class Grapher {
         axisColor = Color.BLACK;
         axisWidth = 1;
 
-        plotWidth = 5;
+        plotWidth = 6;
         plotColor = Color.BLACK;
     }
 
@@ -206,7 +206,7 @@ public class Grapher {
 
         graph.setColor(gridLineColor);
 
-        /* Calculate how many "periods" from the minimum values of the graph to
+        /* Calculate how many "periods" from the minimum values of the graph to // todo: make a function?
          * the first gridline shown ON THE GRAPH. e.g. xMin = 10.8,
          * gridLineSpacing = 1 -> 0.2 periods to first gridline */
         double x_period_left = 1 - xMin % gridLineSpacing;
@@ -216,14 +216,14 @@ public class Grapher {
         int start_x = (int) (x_period_left * spacing_x);
         int start_y = (int) (y_period_left * spacing_y);
 
-        /* Draw horizontal grid lines starting from start_x and moving right */
-        for(int i = start_x; i < width; i += spacing_x) {
+        /* Draw horizontal grid lines starting from start_x and moving down */
+        for(int i = start_x; i < height; i += spacing_x) {
             graph.draw(new Line2D.Double(0, i, width, i));
             System.out.println("Drawing gridLine from (0," + i + ") to (" + width + "," + i + ") in userspace");
         }
 
-        /* Draw horizontal grid lines starting from start_y and moving up */
-        for(int i = start_y; i > 0; i -= spacing_y) {
+        /* Draw vertical grid lines starting from start_y and moving right */
+        for(int i = start_y; i < width; i += spacing_y) {
             graph.draw(new Line2D.Double(i, 0, i, height));
             System.out.println("Drawing gridLine from (" + i + ",0) to (" + i + "," + height + ") in userspace");
         }
@@ -236,7 +236,7 @@ public class Grapher {
      * @param graph
      * @return
      */
-    private Graphics2D drawAxis(Graphics2D graph) { // todo: axis may not be centered
+    private Graphics2D drawAxis(Graphics2D graph) {
         if(axisStroke != null)
             graph.setStroke(axisStroke);
         else
@@ -275,7 +275,7 @@ public class Grapher {
         /* Get location of origin in userspace */
         int[] origin = coordinateToPixel(0, 0);
 
-        /* Calculate x-start and x-end coordinates of ticks on the y-axis */
+        /* Calculate x-end coordinate for ticks on the y-axis */
         int tick_end = origin[0] - tickLength;
 
         if(tickStroke != null) // todo: private void setStroke(Graphics2D, tickStroke, BasicStroke)
