@@ -115,8 +115,8 @@ public class Grapher {
     public Grapher() { // todo: constructor for setting line thicknesses directly, not just through basicstroke
         yMin = -10;
         yMax = 10;
-        xMin = 10;
-        xMax = 20;
+        xMin = -10;
+        xMax = 10;
 
         drawGridlines = true;
         gridLineSpacing = 1;
@@ -221,18 +221,29 @@ public class Grapher {
      */
     private Graphics2D drawAxis(Graphics2D graph) {
         graph.setStroke(axisStroke);
-       graph.setColor(axisColor);
+        graph.setColor(axisColor);
 
-        /* Find location of origin in userspace */
-        int[] origin = coordinateToPixel(0, 0);
+        /* Draw y-axis if x = 0 is found on the graph */
+        if(xMin <= 0 && xMax >= 0) {
+            /* Get start and end coordinates of y-axis on the graph */
+            int[] start_x = coordinateToPixel(0, yMin);
+            int[] end_x = coordinateToPixel(0, yMax);
 
-        /* Draw x-axis */
-        graph.draw(new Line2D.Double(0, origin[1], width, origin[1]));
-        System.out.println("\nDrawing axis from (0," + origin[1] + ") to (" + width + "," + origin[1] + ") in userspace");
+            /* Draw y-axis */
+            graph.draw(new Line2D.Double(start_x[0], start_x[1], end_x[0], end_x[1]));
+            System.out.println("\nDrawing axis from (" + start_x[0] + "," + start_x[1] + ") to (" + end_x[0] + "," + end_x[1] + ") in userspace");
+        }
 
-        /* Draw y-axis */
-        graph.draw(new Line2D.Double(origin[0], 0, origin[0], height));
-        System.out.println("Drawing axis from (" + origin[0] + ",0) to " + origin[0] + "," + height + ") in userspace\n");
+        /* Draw x-axis if y = 0 is found on the graph */
+        if(yMin <= 0 && yMax >= 0) {
+            /* Get start and end coordinates of y-axis on the graph */
+            int[] start_y = coordinateToPixel(xMin, 0);
+            int[] end_y = coordinateToPixel(xMax, 0);
+
+            /* Draw y-axis */
+            graph.draw(new Line2D.Double(start_y[0], start_y[1], end_y[0], end_y[1]));
+            System.out.println("\nDrawing axis from (" + start_y[0] + "," + start_y[1] + ") to (" + end_y[0] + "," + end_y[1] + ") in userspace");
+        }
 
         return graph;
     }
@@ -311,7 +322,7 @@ public class Grapher {
      * @return whether all settings are valid
      * @throws IndexOutOfBoundsException - if settings break the rules
      */
-    private boolean validateSettings() throws IndexOutOfBoundsException { // todo: improve
+    private boolean validateSettings() throws IndexOutOfBoundsException { // todo: improve. what is necessary, what will be strange but not cause a fatal error?
         if(xMax <= xMin)
             throw new IndexOutOfBoundsException("xMax cannot be less than or equal to xMin");
         if(yMax <= yMin)
