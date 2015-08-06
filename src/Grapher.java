@@ -63,15 +63,6 @@ public class Grapher {
     private double gridLineSpacing;
 
     /**
-     * Thickness, or width, of each grid line, in pixels
-     * drawGridLines = true.
-     * This setting also sets the thickness of ticks, if
-     * drawTicks = true.
-     */
-    private int gridLineThickness; // todo: maybe make this an absolute value?
-    // todo: by default base other thicknesses relative to gridLineThickness
-
-    /**
      * Color of grid lines. // todo: specify default values
      */
     private Color gridLineColor;
@@ -111,11 +102,6 @@ public class Grapher {
      */
     private BasicStroke axisStroke;
 
-    /**
-     * Thickness of line demarcating x- and y-axis, in pixels.
-     */
-    private int axisWidth;
-
     private int plotWidth;
 
     private Color plotColor;
@@ -126,7 +112,7 @@ public class Grapher {
     /**
      * Default constructor. Sets all values to default values.
      */
-    public Grapher() {
+    public Grapher() { // todo: constructor for setting line thicknesses directly, not just through basicstroke
         yMin = -10;
         yMax = 10;
         xMin = 10;
@@ -134,17 +120,18 @@ public class Grapher {
 
         drawGridlines = true;
         gridLineSpacing = 1;
-        gridLineThickness = 1;
+        gridLineStroke = new BasicStroke(1);
         gridLineColor = new Color(192, 192, 192);
 
         drawTicks = true;
         tickLength = 4;
+        tickStroke = new BasicStroke(1);
         labelTicks = false;
 
         backgroundColor = Color.WHITE;
 
         axisColor = Color.BLACK;
-        axisWidth = 1;
+        axisStroke = new BasicStroke(1);
 
         plotWidth = 6;
         plotColor = Color.BLACK;
@@ -199,11 +186,7 @@ public class Grapher {
         int spacing_x = (int) (gridLineSpacing * (width / (xMax - xMin)));
         int spacing_y = (int) (gridLineSpacing * (height / (yMax - yMin)));
 
-        if(gridLineStroke != null)
-            graph.setStroke(gridLineStroke);
-        else
-            graph.setStroke(new BasicStroke(gridLineThickness));
-
+        graph.setStroke(gridLineStroke);
         graph.setColor(gridLineColor);
 
         /* Calculate how many "periods" from the minimum values of the graph to // todo: make a function?
@@ -237,12 +220,8 @@ public class Grapher {
      * @return
      */
     private Graphics2D drawAxis(Graphics2D graph) {
-        if(axisStroke != null)
-            graph.setStroke(axisStroke);
-        else
-            graph.setStroke(new BasicStroke(axisWidth));
-
-        graph.setColor(axisColor);
+        graph.setStroke(axisStroke);
+       graph.setColor(axisColor);
 
         /* Find location of origin in userspace */
         int[] origin = coordinateToPixel(0, 0);
@@ -278,11 +257,7 @@ public class Grapher {
         /* Calculate x-end coordinate for ticks on the y-axis */
         int tick_end = origin[0] - tickLength;
 
-        if(tickStroke != null) // todo: private void setStroke(Graphics2D, tickStroke, BasicStroke)
-            graph.setStroke(tickStroke);
-        else
-            graph.setStroke(new BasicStroke(gridLineThickness));
-
+        graph.setStroke(tickStroke);
         graph.setColor(axisColor);
 
         /* Draw vertical ticks starting from origin and moving right along x-axis */ // todo: what if origin off-screen?
@@ -345,18 +320,6 @@ public class Grapher {
             throw new IndexOutOfBoundsException("height cannot be less than or equal to zero");
         if(width <= 0)
             throw new IndexOutOfBoundsException("width cannot be less than or equal to zero");
-        //if(gridLineStroke.getLineWidth() > width || gridLineStroke.getLineWidth() > height)
-        //    throw new IndexOutOfBoundsException("gridLineStroke LineWidth cannot be larger than width or height");
-        /*if(gridLineSpacing > 1)
-            throw new IndexOutOfBoundsException("gridLineSpacing cannot be greater than one");
-        if(gridLineThickness > 1)
-            throw new IndexOutOfBoundsException("gridLineThickness cannot be greater than one");
-        if(tickLength > 1)
-            throw new IndexOutOfBoundsException("tickLength cannot be greater than one");
-        if(axisWidth > 1)
-            throw new IndexOutOfBoundsException("axisWidth cannot be greater than one");
-        if(plotWidth > 1)
-            throw new IndexOutOfBoundsException("plotWidth cannot be greater than one"); */
         return true;
     }
 
