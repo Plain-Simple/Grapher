@@ -113,8 +113,8 @@ public class Grapher {
      * Default constructor. Sets all values to default values.
      */
     public Grapher() { // todo: constructor for setting line thicknesses directly, not just through basicstroke
-        yMin = -10;
-        yMax = 10;
+        yMin = 10;
+        yMax = 20;
         xMin = -10;
         xMax = 10;
 
@@ -155,8 +155,6 @@ public class Grapher {
             if (drawGridlines)
                 graphics = drawGridLines(graphics);
             graphics = drawAxis(graphics);
-            if (drawTicks)
-                graphics = drawTicks(graphics);
         }
 
         return blank_image;
@@ -266,10 +264,17 @@ public class Grapher {
 
             /* Draw y-axis */
             graph.draw(new Line2D.Double(start_x[0], start_x[1], end_x[0], end_x[1]));
-            System.out.println("\nDrawing axis from (" + start_x[0] + "," + start_x[1] + ") to (" + end_x[0] + "," + end_x[1] + ") in userspace");
+            System.out.println("\nDrawing axis from (" + start_x[0] + "," + start_x[1] + ") to (" + end_x[0] + "," + end_x[1] + ")");
 
             if(drawGridlines) {
+                /* Get starting y-coordinate of gridline and spacing */
+                int start_y = getFirstXGridLine();
+                int spacing_x = getXGridLineSpacing();
 
+                for(int i = start_y; i < height; i += spacing_x) {
+                    graph.draw(new Line2D.Double(start_x[0], i, start_x[0] + tickLength, i));
+                    System.out.println("Drawing tick from (" + start_x[0] + "," + i + ") to (" + start_x[0] + tickLength + "," + i + ")");
+                }
             }
         }
 
@@ -281,60 +286,18 @@ public class Grapher {
 
             /* Draw y-axis */
             graph.draw(new Line2D.Double(start_y[0], start_y[1], end_y[0], end_y[1]));
-            System.out.println("\nDrawing axis from (" + start_y[0] + "," + start_y[1] + ") to (" + end_y[0] + "," + end_y[1] + ") in userspace");
-        }
+            System.out.println("\nDrawing axis from (" + start_y[0] + "," + start_y[1] + ") to (" + end_y[0] + "," + end_y[1] + ")");
 
-        return graph;
-    }
+            if(drawGridlines) {
+                /* Get starting x-coordinate of gridline and spacing */
+                int start_x = getFirstYGridLine();
+                int spacing_y = getYGridLineSpacing();
 
-    /**
-     * Draws ticks along x- and y-axis.
-     * Uses gridLineSpacing to determine space between ticks,
-     * axisColor to determine color of ticks that are drawn,
-     * and tickStroke to style the ticks.
-     * @param graph
-     * @return
-     */
-    private Graphics2D drawTicks(Graphics2D graph) {
-        /* First, calculate absolute distance between ticks (px)
-         * Use formula gridLineSpacing (units) * pixels per unit */
-        int spacing_x = (int) (gridLineSpacing * (width / (xMax - xMin)));
-        int spacing_y = (int) (gridLineSpacing * (height / (yMax - yMin)));
-
-        /* Get location of origin in userspace */
-        int[] origin = coordinateToPixel(0, 0);
-
-        /* Calculate x-end coordinate for ticks on the y-axis */
-        int tick_end = origin[0] - tickLength;
-
-        graph.setStroke(tickStroke);
-        graph.setColor(axisColor);
-
-        /* Draw vertical ticks starting from origin and moving right along x-axis */ // todo: what if origin off-screen?
-        for(int i = origin[0] + spacing_x; i < width; i += spacing_x) {
-            graph.draw(new Line2D.Double(i, origin[0], i, tick_end));
-            System.out.println("Drawing tick from (" + i + "," + origin[0] + ") to (" + i + "," + tick_end + ") in userspace");
-        }
-
-        /* Draw vertical ticks starting at origin and moving left along x-axis */ // todo: smarter, left to right, only for coordinates on screen
-        for(int i = origin[0] - spacing_x; i > 0; i -= spacing_x) {
-            graph.draw(new Line2D.Double(i, origin[0], i, tick_end));
-            System.out.println("Drawing tick from (" + i + "," + origin[0] + ") to (" + i + "," + tick_end + ") in userspace");
-        }
-
-        /* Calculate y-start and y-end coordinates of ticks on the x-axis */
-        tick_end = origin[1] + tickLength;
-
-        /* Draw vertical ticks starting from origin and moving right along x-axis */ // todo: what if origin off-screen?
-        for(int i = origin[1] + spacing_y; i < height; i += spacing_y) {
-            graph.draw(new Line2D.Double(origin[1], i, tick_end, i));
-            System.out.println("Drawing tick from (" + origin[1] + "," + i + ") to (" + tick_end + "," + i + ") in userspace");
-        }
-
-        /* Draw vertical ticks starting at origin and moving left along x-axis */
-        for(int i = origin[1] - spacing_y; i > 0; i -= spacing_y) {
-            graph.draw(new Line2D.Double(origin[1], i, tick_end, i));
-            System.out.println("Drawing tick from (" + origin[1] + "," + i + ") to (" + tick_end + "," + i + ") in userspace");
+                for(int i = start_x; i < width; i += spacing_y) {
+                    graph.draw(new Line2D.Double(i, start_y[1], i, start_y[1] - tickLength));
+                    System.out.println("Drawing tick from (" + i + "," + start_y[1] + ") to (" + i + "," + (start_y[1] - tickLength) + ")");
+                }
+            }
         }
 
         return graph;
@@ -428,7 +391,7 @@ public class Grapher {
      * drawGraph() uses calculate and graph range
      * @return
      */
-    public BufferedImage drawGraph(BufferedImage blank_image, double rangeLow, double rangeHigh) { // todo: allow setting ranges
+    public BufferedImage drawGraph(BufferedImage blank_image, double rangeLow, double rangeHigh) {
         setWidthHeight(blank_image);
         drawBackground(blank_image.createGraphics());
         return drawGraphOnGrid(blank_image, rangeLow, rangeHigh);
