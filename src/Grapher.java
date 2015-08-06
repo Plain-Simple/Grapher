@@ -206,29 +206,24 @@ public class Grapher {
 
         graph.setColor(gridLineColor);
 
-        /* Get coordinates of origin to draw out from there */
-        int[] origin = coordinateToPixel(0, 0);
+        /* Calculate how many "periods" from the minimum values of the graph to
+         * the first gridline shown ON THE GRAPH. e.g. xMin = 10.8,
+         * gridLineSpacing = 1 -> 0.2 periods to first gridline */
+        double x_period_left = 1 - xMin % gridLineSpacing;
+        double y_period_left = 1 -yMin % gridLineSpacing;
 
-        /* Draw vertical grid lines starting from origin and moving right */
-        for(int i = origin[0]; i < width; i += spacing_x) {
+        /* Calculate where first gridlines will be */
+        int start_x = (int) (x_period_left * spacing_x);
+        int start_y = (int) (y_period_left * spacing_y);
+
+        /* Draw horizontal grid lines starting from start_x and moving right */
+        for(int i = start_x; i < width; i += spacing_x) {
             graph.draw(new Line2D.Double(0, i, width, i));
             System.out.println("Drawing gridLine from (0," + i + ") to (" + width + "," + i + ") in userspace");
         }
 
-        /* Draw vertical grid lines starting from origin and moving left */
-        for(int i = origin[0]; i > 0; i -= spacing_x) {
-            graph.draw(new Line2D.Double(0, i, width, i));
-            System.out.println("Drawing gridLine from (0," + i + ") to (" + width + "," + i + ") in userspace");
-        }
-        
-        /* Draw horizontal grid lines starting from origin and moving down */
-        for(int i = origin[1]; i < height; i += spacing_y) {
-            graph.draw(new Line2D.Double(i, 0, i, height));
-            System.out.println("Drawing gridLine from (" + i + ",0) to (" + i + "," + height + ") in userspace");
-        }
-
-        /* Draw horizontal grid lines starting from origin and moving up */
-        for(int i = origin[1]; i > 0; i -= spacing_y) {
+        /* Draw horizontal grid lines starting from start_y and moving up */
+        for(int i = start_y; i > 0; i -= spacing_y) {
             graph.draw(new Line2D.Double(i, 0, i, height));
             System.out.println("Drawing gridLine from (" + i + ",0) to (" + i + "," + height + ") in userspace");
         }
