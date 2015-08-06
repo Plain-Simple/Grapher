@@ -181,23 +181,11 @@ public class Grapher {
      * @return
      */
     private Graphics2D drawGridLines(Graphics2D graph) { // todo: gridlines don't line up with actual points
-        /* First, calculate absolute distance between gridlines (px)
-         * Use formula gridLineSpacing (units) * pixels per unit */
-        int spacing_x = (int) (gridLineSpacing * (width / (xMax - xMin)));
-        int spacing_y = (int) (gridLineSpacing * (height / (yMax - yMin)));
-
         graph.setStroke(gridLineStroke);
         graph.setColor(gridLineColor);
 
-        /* Calculate how many "periods" from the minimum values of the graph to // todo: make a function?
-         * the first gridline shown ON THE GRAPH. e.g. xMin = 10.8,
-         * gridLineSpacing = 1 -> 0.2 periods to first gridline */
-        double x_period_left = 1 - xMin % gridLineSpacing;
-        double y_period_left = 1 -yMin % gridLineSpacing;
-
-        /* Calculate where first gridlines will be */
-        int start_x = (int) (x_period_left * spacing_x);
-        int start_y = (int) (y_period_left * spacing_y);
+        int start_x = getFirstXGridLine();
+        int spacing_x = (int) (gridLineSpacing * (width / (xMax - xMin)));
 
         /* Draw horizontal grid lines starting from start_x and moving down */
         for(int i = start_x; i < height; i += spacing_x) {
@@ -205,6 +193,9 @@ public class Grapher {
             System.out.println("Drawing gridLine from (0," + i + ") to (" + width + "," + i + ") in userspace");
         }
 
+        int start_y = getFirstYGridLine();
+        int spacing_y = (int) (gridLineSpacing * (height / (yMax - yMin)));
+        
         /* Draw vertical grid lines starting from start_y and moving right */
         for(int i = start_y; i < width; i += spacing_y) {
             graph.draw(new Line2D.Double(i, 0, i, height));
@@ -212,6 +203,46 @@ public class Grapher {
         }
 
         return graph;
+    }
+
+    /**
+     * Calculates y-coordinate in user-space of top-most horizontal gridline
+     * in the graph's range. This can also be used for ticks because
+     * they use the same spacing and rules as gridlines
+     * @return
+     */
+    private int getFirstXGridLine() {
+        /* Calculate absolute distance between gridlines (px)
+         * Use formula gridLineSpacing (units) * pixels per unit */
+        int spacing_x = (int) (gridLineSpacing * (width / (xMax - xMin)));
+
+        /* Calculate how many "periods" from the minimum values of the graph to
+         * the first gridline shown ON THE GRAPH. e.g. xMin = 10.8,
+         * gridLineSpacing = 1 -> 0.2 periods to first gridline */
+        double x_period_left = 1 - xMin % gridLineSpacing;
+
+        /* Calculate where first gridlines will be */
+        return (int) (x_period_left * spacing_x);
+    }
+
+    /**
+     * Calculates x-coordinate in user-space of left-most vertical gridline
+     * in the graph's range. This can also be used for ticks because
+     * they use the same spacing and rules as gridlines
+     * @return
+     */
+    private int getFirstYGridLine() {
+        /* First, calculate absolute distance between gridlines (px)
+         * Use formula gridLineSpacing (units) * pixels per unit */
+        int spacing_y = (int) (gridLineSpacing * (height / (yMax - yMin)));
+
+        /* Calculate how many "periods" from the minimum values of the graph to // todo: make a function?
+         * the first gridline shown ON THE GRAPH. e.g. xMin = 10.8,
+         * gridLineSpacing = 1 -> 0.2 periods to first gridline */
+        double y_period_left = 1 -yMin % gridLineSpacing;
+
+        /* Calculate where first gridlines will be */
+        return (int) (y_period_left * spacing_y);
     }
 
     /**
