@@ -454,8 +454,10 @@ public class Grapher {
             /* Convert number coordinates to a coordinate on graph's user space */
             int[] px_coordinates = coordinateToPixel(xCoordinate, yCoordinate);
 
-            /* Draw a point with diameter = plotWidth at specified coordinates in userspace */
-            graph.fillOval(px_coordinates[0], px_coordinates[1], plotWidth, plotWidth);
+            /* Draw a point with diameter = plotWidth at specified coordinates in userspace.
+             * Coordinates must be adjusted because filloval draws the shape in a box that
+             * starts at the specified coordinates and goes down and right */
+            graph.fillOval(px_coordinates[0] - plotWidth / 2, px_coordinates[1] - plotWidth / 2, plotWidth, plotWidth);
 
             System.out.println("Drawing point at (" + px_coordinates[0] + "," + px_coordinates[1] + ")");
         }
