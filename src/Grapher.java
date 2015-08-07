@@ -270,12 +270,12 @@ public class Grapher {
                 double first_tick = pixelToCoordinate(start_y, start_x[1])[1];
                 System.out.println("First y tick at " + first_tick);
 
-                for(int i = start_y, j = 1; i < height; i += spacing_x) {
+                for(int i = start_y, j = 1; i < height; i += spacing_x, j++) {
                     graph.draw(new Line2D.Double(start_x[0], i, start_x[0] + tickLength, i));
                     System.out.println("Drawing tick from (" + start_x[0] + "," + i + ") to (" + start_x[0] + tickLength + "," + i + ")");
-                    if(j % 2 == 0)
+                    /* Label every other tick, except zero (zero is labeled on the x-axis) */
+                    if(j % 2 == 0 && first_tick - j * gridLineSpacing != 0)
                         drawLeftJustifiedString(graph, Double.toString(first_tick - j * gridLineSpacing), start_x[0], i);
-                    j++;
                 }
             }
         }
@@ -297,12 +297,11 @@ public class Grapher {
 
                 double first_tick = pixelToCoordinate(start_x, start_y[1])[0];
 
-                for(int i = start_x, j = 1; i < width; i += spacing_y) {
+                for(int i = start_x, j = 1; i < width; i += spacing_y, j++) {
                     graph.draw(new Line2D.Double(i, start_y[1], i, start_y[1] - tickLength));
                     System.out.println("Drawing tick from (" + i + "," + start_y[1] + ") to (" + i + "," + (start_y[1] - tickLength) + ")");
                     if(j % 2 == 0)
                         drawCenteredString(graph, Double.toString(first_tick + j * gridLineSpacing), i, start_y[1]);
-                    j++;
                 }
             }
         }
@@ -317,7 +316,7 @@ public class Grapher {
     private void drawLeftJustifiedString(Graphics g, String s, int xCoordinate, int yCoordinate) {
         g.setFont(new Font("SansSerif", Font.PLAIN, 12));
         FontMetrics fm = g.getFontMetrics();
-        g.drawString(s, xCoordinate - fm.stringWidth(s), yCoordinate + fm.getHeight() / 2);
+        g.drawString(s, xCoordinate - fm.stringWidth(s), yCoordinate + fm.getAscent() / 2 - 1);
     }
 
     /**
