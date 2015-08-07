@@ -366,7 +366,7 @@ public class Grapher {
      * @throws IndexOutOfBoundsException if double[0] is a different
      * size than double[1]
      */
-    public BufferedImage drawGraph(BufferedImage blank_image, double[][] points,boolean labelPoints) throws IndexOutOfBoundsException {
+    public BufferedImage drawGraph(BufferedImage blank_image, double[][] points, boolean labelPoints) throws IndexOutOfBoundsException {
         setWidthHeight(blank_image);
 
         if(validateSettings()) {
@@ -389,7 +389,7 @@ public class Grapher {
      * @param points
      * @return
      */
-    public BufferedImage drawGraphOnGrid(BufferedImage grid, double[][] points, boolean labelPoints) throws IndexOutOfBoundsException {
+    public BufferedImage drawGraphOnGrid(BufferedImage grid, double[][] points, boolean labelPoints) throws IndexOutOfBoundsException { // todo: catch exception and throw one with message
         setWidthHeight(grid);
         if(validateSettings()) {
             Graphics2D graph = grid.createGraphics();
@@ -412,9 +412,9 @@ public class Grapher {
      * drawGraph() uses calculate and graph range
      * @return
      */
-    public BufferedImage drawGraph(BufferedImage blank_image, double rangeLow, double rangeHigh) {
+    public BufferedImage drawGraph(BufferedImage blank_image, double rangeLow, double rangeHigh) { // todo: check range
         setWidthHeight(blank_image);
-        drawBackground(blank_image.createGraphics());
+        blank_image = drawGrid(blank_image);
         return drawGraphOnGrid(blank_image, rangeLow, rangeHigh);
     }
 
@@ -425,7 +425,7 @@ public class Grapher {
         graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
 
-        float units_per_pxl = (xMax - xMin) / width;
+        float units_per_pxl = (float) (xMax - xMin) / width;
 
         for(double i = rangeLow; i <= rangeHigh; i += units_per_pxl) {
             drawPoint(graph, i, calculate(i));
@@ -450,7 +450,7 @@ public class Grapher {
         if((xCoordinate >= xMin && xCoordinate <= xMax) && (yCoordinate >= yMin && yCoordinate <= yMax)) {
             /* Convert number coordinates to a coordinate on graph's user space */
             int[] px_coordinates = coordinateToPixel(xCoordinate, yCoordinate);
-
+            plotWidth = 1;
             /* Draw a point with diameter = plotWidth at specified coordinates in userspace.
              * Coordinates must be adjusted because filloval draws the shape in a box that
              * starts at the specified coordinates and goes down and right */
