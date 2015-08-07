@@ -316,7 +316,7 @@ public class Grapher {
     private void drawLeftJustifiedString(Graphics g, String s, int xCoordinate, int yCoordinate) {
         g.setFont(new Font("SansSerif", Font.PLAIN, 12));
         FontMetrics fm = g.getFontMetrics();
-        g.drawString(s, xCoordinate - fm.stringWidth(s), yCoordinate + fm.getAscent() / 2 - 1);
+        g.drawString(s, xCoordinate - fm.stringWidth(s), yCoordinate + fm.getAscent() / 2 - 1); // todo: why is -1 needed?
     }
 
     /**
@@ -361,17 +361,18 @@ public class Grapher {
      * drawn as circles using plotStroke, plotWidth, and plotColor
      * properties. // todo: properties or fields?
      * @param points x- and y-values of points to plot and emphasize // todo: update
+     * @param labelPoints whether or not to label points
      * @return
-     * @throws IndexOutOfBoundsException - if double[0] is a different
+     * @throws IndexOutOfBoundsException if double[0] is a different
      * size than double[1]
      */
-    public BufferedImage drawGraph(BufferedImage blank_image, double[][] points) throws IndexOutOfBoundsException {
+    public BufferedImage drawGraph(BufferedImage blank_image, double[][] points,boolean labelPoints) throws IndexOutOfBoundsException {
         setWidthHeight(blank_image);
 
         if(validateSettings()) {
             blank_image = drawGrid(blank_image);
             System.out.println();
-            return drawGraphOnGrid(blank_image, points);
+            return drawGraphOnGrid(blank_image, points, labelPoints);
         }
 
         return blank_image;
@@ -388,7 +389,7 @@ public class Grapher {
      * @param points
      * @return
      */
-    public BufferedImage drawGraphOnGrid(BufferedImage grid, double[][] points) throws IndexOutOfBoundsException {
+    public BufferedImage drawGraphOnGrid(BufferedImage grid, double[][] points, boolean labelPoints) throws IndexOutOfBoundsException {
         setWidthHeight(grid);
         if(validateSettings()) {
             Graphics2D graph = grid.createGraphics();
@@ -397,6 +398,10 @@ public class Grapher {
                     RenderingHints.VALUE_ANTIALIAS_ON);
             for(int i = 0; i < points[0].length; i++) {
                 drawPoint(graph, points[0][i], points[1][i]);
+                if(labelPoints) {
+                    int[] coordinates = coordinateToPixel(points[0][i], points[1][i]);
+                    drawCenteredString(graph, "(" + points[0][i] + "," + points[1][i] + ")", coordinates[0], coordinates[1]);
+                }
             }
         }
 
@@ -458,7 +463,7 @@ public class Grapher {
     }
 
     /**
-     * Converts coordinates of a point on the graph to coordinates of // todo: make sure ratio of pixels to units isn't > int limit (32765)
+     * Converts coordinates of a point on the graph to coordinates of // todo: make sure ratio of pixels to units isn't > int limit
      * that pixel on the userspace of the Graphics2D object where drawing
      * takes place.
      * Uses window settings and height and width fields. Errors will occur
@@ -506,8 +511,4 @@ public class Grapher {
         width = to_draw.getWidth();
         height = to_draw.getHeight();
     }
-
-    //public Graphics labelPoint(double xCoordinate, double yCoordinate) {
-
-    //}
 }
