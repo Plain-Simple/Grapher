@@ -114,8 +114,8 @@ public class Grapher {
      * Default constructor. Sets all values to default values.
      */
     public Grapher() { // todo: constructor for setting line thicknesses directly, not just through basicstroke
-        yMin = 10;
-        yMax = 20;
+        yMin = -10;
+        yMax = 10;
         xMin = -10;
         xMax = 10;
 
@@ -255,53 +255,69 @@ public class Grapher {
         /* Draw y-axis if x = 0 is found on the graph */
         if(xMin <= 0 && xMax >= 0) {
             /* Get start and end coordinates of y-axis on the graph */
-            int[] start_x = coordinateToPixel(0, yMin);
-            int[] end_x = coordinateToPixel(0, yMax);
+            int[] start_x = coordinateToPixel(0, yMax);
+            int[] end_x = coordinateToPixel(0, yMin);
 
             /* Draw y-axis */
             graph.draw(new Line2D.Double(start_x[0], start_x[1], end_x[0], end_x[1]));
             System.out.println("\nDrawing axis from (" + start_x[0] + "," + start_x[1] + ") to (" + end_x[0] + "," + end_x[1] + ")");
 
-            if(drawGridlines) {
+            if(drawTicks) {
                 /* Get starting coordinate of first horizontal gridline and spacing */
                 int start_y = getFirstXGridLine();
                 int spacing_x = getXGridLineSpacing();
 
-                for(int i = start_y; i < height; i += spacing_x) {
+                double first_tick = pixelToCoordinate(start_y, start_x[1])[1];
+                System.out.println("First y tick at " + first_tick);
+
+                for(int i = start_y, j = 1; i < height; i += spacing_x) {
                     graph.draw(new Line2D.Double(start_x[0], i, start_x[0] + tickLength, i));
                     System.out.println("Drawing tick from (" + start_x[0] + "," + i + ") to (" + start_x[0] + tickLength + "," + i + ")");
+                    if(j % 2 == 0)
+                        drawLeftJustifiedString(graph, Double.toString(first_tick - j * gridLineSpacing), start_x[0], i);
+                    j++;
                 }
             }
         }
 
         /* Draw x-axis if y = 0 is found on the graph */
         if(yMin <= 0 && yMax >= 0) {
-            /* Get start and end coordinates of y-axis on the graph */
+            /* Get start and end coordinates of x-axis on the graph */
             int[] start_y = coordinateToPixel(xMin, 0);
             int[] end_y = coordinateToPixel(xMax, 0);
 
-            /* Draw y-axis */
+            /* Draw x-axis */
             graph.draw(new Line2D.Double(start_y[0], start_y[1], end_y[0], end_y[1]));
             System.out.println("\nDrawing axis from (" + start_y[0] + "," + start_y[1] + ") to (" + end_y[0] + "," + end_y[1] + ")");
 
-            if(drawGridlines) {
+            if(drawTicks) {
                 /* Get starting x-coordinate of first vertical gridline and spacing */
                 int start_x = getFirstYGridLine();
                 int spacing_y = getYGridLineSpacing();
 
-                for(int i = start_x; i < width; i += spacing_y) {
+                double first_tick = pixelToCoordinate(start_x, start_y[1])[0];
+
+                for(int i = start_x, j = 1; i < width; i += spacing_y) {
                     graph.draw(new Line2D.Double(i, start_y[1], i, start_y[1] - tickLength));
                     System.out.println("Drawing tick from (" + i + "," + start_y[1] + ") to (" + i + "," + (start_y[1] - tickLength) + ")");
-
+                    if(j % 2 == 0)
+                        drawCenteredString(graph, Double.toString(first_tick + j * gridLineSpacing), i, start_y[1]);
+                    j++;
                 }
             }
         }
     }
 
     private void drawCenteredString(Graphics g, String s, int xCoordinate, int yCoordinate) {
-        g.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        g.setFont(new Font("SansSerif", Font.PLAIN, 12));
         FontMetrics fm = g.getFontMetrics();
         g.drawString(s, xCoordinate - fm.stringWidth(s) / 2, yCoordinate + fm.getHeight());
+    }
+
+    private void drawLeftJustifiedString(Graphics g, String s, int xCoordinate, int yCoordinate) {
+        g.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        FontMetrics fm = g.getFontMetrics();
+        g.drawString(s, xCoordinate - fm.stringWidth(s), yCoordinate + fm.getHeight() / 2);
     }
 
     /**
