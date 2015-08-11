@@ -369,16 +369,26 @@ public class Grapher {
         g.drawString(s, x - fm.stringWidth(s) / 2, y + fm.getHeight());
     }
 
-    private void drawLeftJustifiedString(Graphics g, String s, int xCoordinate, int yCoordinate) {
+    /**
+     * Draws a String using labelFont to the left and centered
+     * vertically to given user-space coordinates.
+     *
+     * @param g Graphics2D object for String to be drawn on
+     * @param s String to be drawn
+     * @param x x-coordinate in user-space to draw String below
+     * @param y y-coordinate in user-space to draw String below
+     */
+    private void drawLeftJustifiedString(Graphics g, String s, int x, int y) {
         g.setFont(new Font("SansSerif", Font.PLAIN, 12));
         FontMetrics fm = g.getFontMetrics();
-        g.drawString(s, xCoordinate - fm.stringWidth(s), yCoordinate + fm.getAscent() / 2 - 1); // todo: why is -1 needed?
+        g.drawString(s, x - fm.stringWidth(s), y + fm.getAscent() / 2 - 1); // todo: why is -1 needed?
     }
 
     /**
-     * "y = " or "f(x)" function used for graphing user-specified
-     * function. By default, returns x.
+     * "y = " or "f(x)" function used for graphing a continuous
+     * or piecewise function defined by the user. By default, returns x.
      * To change this the user must enter their own expression.
+     *
      * @param x x-value used to calculate f(x)
      * @return f(x) using expression
      */
@@ -387,14 +397,14 @@ public class Grapher {
     }
 
     /**
-     * Checks to make sure that all settings are valid.
-     * xMax must be greater than xMin and yMax must
-     * be greater than yMin. Height and Width must
-     * be greater than zero. Also makes sure that all
-     * settings relative to height and width are less
-     * than or equal to one.
-     * @return whether all settings are valid
-     * @throws IndexOutOfBoundsException - if settings break the rules
+     * Checks to make sure that settings will not cause an
+     * error when the graph is drawn. To be valid, xMax must
+     * be greater than xMin and yMax must be greater than yMin.
+     * height and width must be greater than zero.
+     *
+     * @return whether all settings are valid and graphing can proceed
+     * @throws IndexOutOfBoundsException if a graph cannot be drawn
+     * using the current settings
      */
     private boolean validateSettings() throws IndexOutOfBoundsException { // todo: improve. what is necessary, what will be strange but not cause a fatal error?
         if(xMax <= xMin)
@@ -495,15 +505,15 @@ public class Grapher {
      * Note: if coordinates are out of graph's range they will
      * not be plotted.
      * @param graph Graphics2D object of graph being drawn on
-     * @param xCoordinate x-coordinate of point being plotted
-     * @param yCoordinate y-coordinate of point being plotted
+     * @param x x-coordinate of point being plotted
+     * @param y y-coordinate of point being plotted
      * @return
      */
-    private Graphics2D drawPoint(Graphics2D graph, double xCoordinate, double yCoordinate) {
+    private Graphics2D drawPoint(Graphics2D graph, double x, double y) {
         /* Check to see if coordinates fall in graph range */
-        if((xCoordinate >= xMin && xCoordinate <= xMax) && (yCoordinate >= yMin && yCoordinate <= yMax)) {
+        if((x >= xMin && x <= xMax) && (y >= yMin && y <= yMax)) {
             /* Convert number coordinates to a coordinate on graph's user space */
-            int[] px_coordinates = coordinateToPixel(xCoordinate, yCoordinate);
+            int[] px_coordinates = coordinateToPixel(x, y);
             /* Draw a point with diameter = plotWidth at specified coordinates in userspace.
              * Coordinates must be adjusted because filloval draws the shape in a box that
              * starts at the specified coordinates and goes down and right */
@@ -521,12 +531,12 @@ public class Grapher {
      * takes place.
      * Uses window settings and height and width fields. Errors will occur
      * if these settings are not up to date.
-     * @param xCoordinate
-     * @param yCoordinate
+     * @param x
+     * @param y
      * @return int[] where int[0] is x-coordinate and int[1] is y-coordinate of
      * point's location in userspace
      */
-    private int[] coordinateToPixel(double xCoordinate, double yCoordinate) {
+    private int[] coordinateToPixel(double x, double y) {
         /* Calculate pixels per unit using the formula
          * axis width (pixels) / axis range (units) */
         double x_px_unit = width / (xMax - xMin);
@@ -534,23 +544,23 @@ public class Grapher {
 
         /* For each dimension, calculate distance away from min value on the axis
          * and multiply by the pixels per unit ratio */
-        return new int[] {(int) ((xCoordinate - xMin) * x_px_unit), (int) (height - (yCoordinate - yMin) * y_px_unit)};
+        return new int[] {(int) ((x - xMin) * x_px_unit), (int) (height - (y - yMin) * y_px_unit)};
     }
 
     /**
      * Converts coordinates of a pixel on the userspace to the
      * coordinates of the point on that pixel on the graph.
-     * @param xPixel
-     * @param yPixel
+     * @param x
+     * @param y
      * @return
      */
-    private double[] pixelToCoordinate(int xPixel, int yPixel) {
+    private double[] pixelToCoordinate(int x, int y) {
         /* Calculate units per pixel using the formula
          * axis range (units) / axis width (pixels)*/
         double x_unit_px = (xMax - xMin) / width;
         double y_unit_px = (yMax - yMin) / height;
 
-        return new double[] { xMin + (xPixel * x_unit_px), yMax - (yPixel * y_unit_px) };
+        return new double[] { xMin + (x * x_unit_px), yMax - (y * y_unit_px) };
     }
 
     /**
