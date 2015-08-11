@@ -56,33 +56,46 @@ public class Grapher {
     private boolean drawGridlines;
 
     /**
-     * Units between gridlines, if drawGridLines = true.
-     * Because ticks are only drawn where there are grid lines,
-     * this setting also determines the spacing between ticks.
+     * Spacing of grid lines to be drawn if drawGridLines = true.
+     * For example, a gridLineSpacing of 1.0 will draw grid lines
+     * at one unit intervals. Because ticks are only drawn where
+     * there are grid lines, this setting also determines the spacing
+     * of ticks.
      */
     private double gridLineSpacing;
 
     /**
-     * Color of grid lines. // todo: specify default values
+     * Color used to draw grid lines.
      */
     private Color gridLineColor;
 
     /**
-     * BasicStroke used when drawing grid lines with the Graphics
-     * API
+     * BasicStroke used to draw grid lines and ticks.
      */
     private BasicStroke gridLineStroke;
 
     /**
      * Whether or not to draw ticks along the x- and y-axis.
-     *
+     * Ticks are small lines drawn along the axis using
+     * the same spacing and stroke as grid lines and the same
+     * color as the axis. Ticks extend to the right of the y-axis
+     * and up from the x-axis.
      */
-    private boolean drawTicks; // todo: add label ticks option
+    private boolean drawTicks;
 
-    private BasicStroke tickStroke;
-
+    /**
+     * Length, in pixels, of ticks to be drawn perpendicularly
+     * from the x- and y-axis.
+     */
     private int tickLength;
 
+    /**
+     * Whether or not to label ticks with their graphical
+     * coordinates along the axis. Labels are printed to
+     * the left of the y-axis and below the x-axis.
+     * Spacing and precision of the labels is defined by
+     * how much space there is between grid lines.
+     */
     private boolean labelTicks;
 
     /**
@@ -91,31 +104,44 @@ public class Grapher {
     private Color backgroundColor;
 
     /**
-     * Color of axis, and ticks drawn along axis
-     * (if drawTicks = true).
+     * Color used to draw axis and ticks
      */
     private Color axisColor;
 
     /**
-     * BasicStroke style used for drawing the axis with the
-     * Graphics API
+     * BasicStroke style used for drawing the axis
      */
     private BasicStroke axisStroke;
 
+    /**
+     * Thickness, in pixels, of points and lines
+     * drawn on the graph. // todo: individual points thicker than sets
+     */
     private int plotWidth;
 
+    /**
+     * Color used to draw points on the graph.
+     */
     private Color plotColor;
 
+    /**
+     * Font used when labeling ticks and specified points.
+     */
     private Font labelFont;
 
     // todo: check that range makes sense; Add documentation
     // todo: allow user to set BasicStrokes for components
     /**
-     * Default constructor. Sets all values to default values.
+     * Default constructor. Sets window range from -10 to 10
+     * on the x-axis and -10 to 10 on the y-axis. Sets
+     * drawGridLines and drawTicks to true. gridLineSpacing is
+     * set to 1, gridLineStroke and axisStroke to 1 pixel thick,
+     * and plotWidth to 2. Default colors are white for background,
+     * black for plot and axis, and grey for grid lines and ticks.
      */
     public Grapher() { // todo: constructor for setting line thicknesses directly, not just through basicstroke
-        yMin = -10;
-        yMax = 10;
+        yMin = -10;    // todo: specify default values
+        yMax = 10;     // todo: remember precision of each value. Label with lowest precision
         xMin = -10;
         xMax = 10;
 
@@ -126,7 +152,6 @@ public class Grapher {
 
         drawTicks = true;
         tickLength = 4;
-        tickStroke = new BasicStroke(1);
         labelTicks = false;
 
         backgroundColor = Color.WHITE;
@@ -134,17 +159,18 @@ public class Grapher {
         axisColor = Color.BLACK;
         axisStroke = new BasicStroke(1);
 
-        plotWidth = 6;
+        plotWidth = 2;
         plotColor = Color.BLACK;
     }
 
     /**
      * Draws the grid, or background, for the function/points
-     * to be plotted on graph. Fills in background color
-     * of graph, draws grid lines (if drawGridLines = true),
+     * to be plotted on the graph. Fills in the background color
+     * of the graph, draws grid lines (if drawGridLines = true),
      * draws axis, and draws ticks (if drawTicks = true).
-     * @param blank_image blank BufferedImage for grid to be drawn on
-     * @return blank_image with grid drawn on it
+     *
+     * @param blank_image BufferedImage for grid to be drawn on
+     * @return the BufferedImage with a grid drawn on it
      */
     public BufferedImage drawGrid(BufferedImage blank_image) {
         setWidthHeight(blank_image);
@@ -162,9 +188,10 @@ public class Grapher {
     }
 
     /**
-     * Sets background color of graph using the backgroundColor
-     * field.
-     * @param graph Graphics2D object of graph being drawn
+     * Draws a solid background on the Graphics2D object of
+     * color backgroundColor.
+     *
+     * @param graph Graphics2D object with background filled in
      */
     private void drawBackground(Graphics2D graph) {
         graph.setColor(backgroundColor);
@@ -172,9 +199,11 @@ public class Grapher {
     }
 
     /**
-     * Uses class-defined settings to draw horizontal and vertical
-     * grid lines on the BufferedImage.
-     * @param graph Graphics2D object of graph being drawn
+     * Draws horizontal and vertical grid lines on the Graphics2D
+     * object using gridLineStroke and gridLineColor, at intervals
+     * specified by gridLineSpacing.
+     *
+     * @param graph Graphics2D object for grid lines to be drawn on
      */
     private void drawGridLines(Graphics2D graph) {
         graph.setStroke(gridLineStroke);
@@ -200,10 +229,12 @@ public class Grapher {
     }
 
     /**
-     * Calculates y-coordinate in user-space of top-most horizontal gridline
+     * Calculates y-coordinate in user-space of the top-most horizontal grid line
      * in the graph's range. This can also be used for ticks because
-     * they use the same spacing and rules as gridlines
-     * @return
+     * they use the same spacing and rules as grid lines
+     *
+     * @return the y-coordinate in user-space of the top-most horizontal grid line
+     * or tick seen on the graph. // todo: what if no grid line is on the graph?
      */
     private int getFirstXGridLine() {
         /* Calculate how many "periods" from the minimum values of the graph to
@@ -216,10 +247,12 @@ public class Grapher {
     }
 
     /**
-     * Calculates x-coordinate in user-space of left-most vertical gridline
+     * Calculates x-coordinate in user-space of left-most vertical grid line
      * in the graph's range. This can also be used for ticks because
-     * they use the same spacing and rules as gridlines
-     * @return
+     * they use the same spacing and rules as grid lines
+     *
+     * @return the x-coordinate in user-space of the left-most horizontal
+     * grid line or tick seen on the graph.
      */
     private int getFirstYGridLine() {
         /* Calculate how many "periods" from the minimum values of the graph to // todo: make a function?
@@ -231,22 +264,34 @@ public class Grapher {
         return (int) (y_period_left * getYGridLineSpacing());
     }
 
-    /* Calculates distance between vertical gridlines (px) */
+    /**
+     * Calculates the distance, in pixels, between vertical grid lines
+     * using gridLineSpacing and window ranges.
+     *
+     * @return spacing, in pixels, between vertical grid lines
+     */
     private int getYGridLineSpacing() {
         /* gridLineSpacing (units) * pixels per unit */
         return (int) (gridLineSpacing * (width / (xMax - xMin)));
     }
 
-    /* Calculates distance between horizontal gridlines (px) */
+    /**
+     * Calculates distance, in pixels, between horizontal grid lines
+     * using gridLineSpacing and window ranges.
+     *
+     * @return spacing, in pixels, between vertical grid lines // todo: could this be one pixel too large?
+     */
     private int getXGridLineSpacing() {
         /* gridLineSpacing (units) * pixels per unit */
         return (int) (gridLineSpacing * (height / (yMax - yMin)));
     }
 
     /**
+     * Draws axis and ticks (if drawTicks = true) on the Graphics2D
+     * object using axisStroke, axisColor, gridLineStroke, and
+     * gridLineSpacing if axis passes through the graph's window.
      *
-     * @param graph
-     * @return
+     * @param graph Graphics2D object for axis to be drawn on
      */
     private void drawAxis(Graphics2D graph) {
         graph.setStroke(axisStroke);
@@ -263,6 +308,7 @@ public class Grapher {
             System.out.println("\nDrawing axis from (" + start_x[0] + "," + start_x[1] + ") to (" + end_x[0] + "," + end_x[1] + ")");
 
             if(drawTicks) {
+                graph.setStroke(gridLineStroke);
                 /* Get starting coordinate of first horizontal gridline and spacing */
                 int start_y = getFirstXGridLine();
                 int spacing_x = getXGridLineSpacing();
@@ -274,7 +320,7 @@ public class Grapher {
                     graph.draw(new Line2D.Double(start_x[0], i, start_x[0] + tickLength, i));
                     System.out.println("Drawing tick from (" + start_x[0] + "," + i + ") to (" + start_x[0] + tickLength + "," + i + ")");
                     /* Label every other tick, except zero (zero is labeled on the x-axis) */
-                    if(j % 2 == 0 && first_tick - j * gridLineSpacing != 0)
+                    if(j % 2 == 0 && first_tick - j * gridLineSpacing != 0 && labelTicks == true)
                         drawLeftJustifiedString(graph, Double.toString(first_tick - j * gridLineSpacing), start_x[0], i);
                 }
             }
@@ -291,6 +337,7 @@ public class Grapher {
             System.out.println("\nDrawing axis from (" + start_y[0] + "," + start_y[1] + ") to (" + end_y[0] + "," + end_y[1] + ")");
 
             if(drawTicks) {
+                graph.setStroke(gridLineStroke);
                 /* Get starting x-coordinate of first vertical gridline and spacing */
                 int start_x = getFirstYGridLine();
                 int spacing_y = getYGridLineSpacing();
@@ -300,17 +347,26 @@ public class Grapher {
                 for(int i = start_x, j = 1; i < width; i += spacing_y, j++) {
                     graph.draw(new Line2D.Double(i, start_y[1], i, start_y[1] - tickLength));
                     System.out.println("Drawing tick from (" + i + "," + start_y[1] + ") to (" + i + "," + (start_y[1] - tickLength) + ")");
-                    if(j % 2 == 0)
+                    if(j % 2 == 0 && drawTicks == true)
                         drawCenteredString(graph, Double.toString(first_tick + j * gridLineSpacing), i, start_y[1]);
                 }
             }
         }
     }
 
-    private void drawCenteredString(Graphics g, String s, int xCoordinate, int yCoordinate) {
+    /**
+     * Draws a String using labelFont just below and centered to
+     * given user-space coordinates.
+     *
+     * @param g Graphics2D object for String to be drawn on
+     * @param s String to be drawn
+     * @param x x-coordinate in user-space to draw String below
+     * @param y y-coordinate in user-space to draw String below
+     */
+    private void drawCenteredString(Graphics g, String s, int x, int y) {
         g.setFont(new Font("SansSerif", Font.PLAIN, 12));
         FontMetrics fm = g.getFontMetrics();
-        g.drawString(s, xCoordinate - fm.stringWidth(s) / 2, yCoordinate + fm.getHeight());
+        g.drawString(s, x - fm.stringWidth(s) / 2, y + fm.getHeight());
     }
 
     private void drawLeftJustifiedString(Graphics g, String s, int xCoordinate, int yCoordinate) {
@@ -327,7 +383,7 @@ public class Grapher {
      * @return f(x) using expression
      */
     public double calculate(double x) {
-        return x;
+        return Math.pow(x, 2) + 4 * x + 4;
     }
 
     /**
@@ -422,8 +478,6 @@ public class Grapher {
         setWidthHeight(grid);
         Graphics2D graph = grid.createGraphics();
         graph.setColor(plotColor);
-        graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
 
         float units_per_pxl = (float) (xMax - xMin) / width;
 
@@ -450,7 +504,6 @@ public class Grapher {
         if((xCoordinate >= xMin && xCoordinate <= xMax) && (yCoordinate >= yMin && yCoordinate <= yMax)) {
             /* Convert number coordinates to a coordinate on graph's user space */
             int[] px_coordinates = coordinateToPixel(xCoordinate, yCoordinate);
-            plotWidth = 1;
             /* Draw a point with diameter = plotWidth at specified coordinates in userspace.
              * Coordinates must be adjusted because filloval draws the shape in a box that
              * starts at the specified coordinates and goes down and right */
