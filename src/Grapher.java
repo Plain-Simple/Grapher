@@ -173,7 +173,7 @@ public class Grapher {
      * @return the BufferedImage with a grid drawn on it
      */
     public BufferedImage drawGrid(BufferedImage blank_image) {
-        setWidthHeight(blank_image);
+        setHeightWidth(blank_image);
 
         Graphics2D graphics = blank_image.createGraphics();
 
@@ -419,21 +419,24 @@ public class Grapher {
     }
 
     /**
-     * Renders graph from scratch and draws and emphasizes specified
-     * points on the graph (as long as they are in the graph's range).
+     * Draws graph and plots specified points on the BufferedImage.
+     * Points outside window range will not be plotted.
      * Coordinates of points to draw on graph are passed in 2d array
      * where double[0][index] gives the x-coordinate of a point and
-     * double[1][index] gives the coresponding y-coordinate. Points are
-     * drawn as circles using plotStroke, plotWidth, and plotColor
-     * properties. // todo: properties or fields?
-     * @param points x- and y-values of points to plot and emphasize // todo: update
-     * @param labelPoints whether or not to label points
-     * @return
+     * double[1][index] gives the corresponding y-coordinate. Points are
+     * drawn as circles with radius plotWidth and plotColor. Passing
+     * labelPoints as true will label each point with comma-separated
+     * coordinates in parentheses next to the point (e.g. (x,y)).
+     *
+     * @param blank_image BufferedImage on which to draw graph
+     * @param points x- and y-values of points to plot
+     * @param labelPoints whether or not to label points with their coordinates
+     * @return BufferedImage with graph drawn on it
      * @throws IndexOutOfBoundsException if double[0] is a different
      * size than double[1]
      */
     public BufferedImage drawGraph(BufferedImage blank_image, double[][] points, boolean labelPoints) throws IndexOutOfBoundsException {
-        setWidthHeight(blank_image);
+        setHeightWidth(blank_image);
 
         if(validateSettings()) {
             blank_image = drawGrid(blank_image);
@@ -445,18 +448,27 @@ public class Grapher {
     }
 
     /**
-     * Draws graph on the specified grid using window values specified
-     * (Y_MIN, Y_MAX, X_MIN, X_MAX).
+     * Plots points on the specified BufferedImage,
+     * which is assumed to be a pre-rendered grid with the same
+     * window values as the current graph being drawn on it. Points
+     * outside window range will not be plotted. Coordinates of points
+     * to draw on graph are passed in 2d array where double[0][index]
+     * gives the x-coordinate of a point and double[1][index] gives
+     * the corresponding y-coordinate. Points are drawn as circles
+     * with radius plotWidth and plotColor. Passing labelPoints as
+     * true will label each point with comma-separated coordinates
+     * in parentheses next to the point (e.g. (x,y)).
      *
-     * Use values to specify individual points to plot, where first index
-     * is x-coordinate and second index is y-coordinate.
-     *
-     * @param grid
-     * @param points
-     * @return
+     * @param grid BufferedImage on which to plot points
+     * @param points x- and y-values of points to plot
+     * @param labelPoints whether or not to label points with their coordinates
+     * @return BufferedImage with points plotted on it
+     * @throws IndexOutOfBoundsException if double[0] is a different
+     * size than double[1]
      */
-    public BufferedImage drawGraphOnGrid(BufferedImage grid, double[][] points, boolean labelPoints) throws IndexOutOfBoundsException { // todo: catch exception and throw one with message
-        setWidthHeight(grid);
+    public BufferedImage drawGraphOnGrid(BufferedImage grid,
+             double[][] points, boolean labelPoints) throws IndexOutOfBoundsException { // todo: catch exception and throw one with message
+        setHeightWidth(grid);
         if(validateSettings()) {
             Graphics2D graph = grid.createGraphics();
             graph.setColor(plotColor);
@@ -475,17 +487,36 @@ public class Grapher {
     }
 
     /**
-     * drawGraph() uses calculate and graph range
-     * @return
+     * Draws graph and uses f(x) function in calculate(double x)
+     * to plot points continuously from rangeLow to rangeHigh
+     * on the graph. Points outside window range will not be plotted.
+     * Points are drawn as circles with diameter plotWidth and plotColor. // todo: need a smarter algorithm
+     *
+     * @param blank_image BufferedImage on which to draw the graph
+     * @param rangeLow lowest x-value, inclusive, to use in calculating f(x) values
+     * @param rangeHigh highest x-value, inclusive, to use in calculating f(x) values
+     * @return BufferedImage with graph drawn on it
      */
-    public BufferedImage drawGraph(BufferedImage blank_image, double rangeLow, double rangeHigh) { // todo: check range
-        setWidthHeight(blank_image);
+    public BufferedImage drawGraph(BufferedImage blank_image, double rangeLow, double rangeHigh) { // todo: rename param blank_image?
+        setHeightWidth(blank_image);
         blank_image = drawGrid(blank_image);
         return drawGraphOnGrid(blank_image, rangeLow, rangeHigh);
     }
 
+    /**
+     * Plots points on the specified BufferedImage using f(x)
+     * function in calculate(double x) to plot points continuosly
+     * form rangeLow to rangeHigh on the graph. Points outside
+     * window range will not be plotted. Points are drawn as
+     * circles with diameter plotWidth and plotColor.
+     *
+     * @param grid BufferedImage on which to plot points
+     * @param rangeLow lowest x-value, inclusive, to use in calculating f(x) values
+     * @param rangeHigh highest x-value, inclusive, to use in calculating f(x) values
+     * @return BufferedImage with points plotted on it
+     */
     public BufferedImage drawGraphOnGrid(BufferedImage grid, double rangeLow, double rangeHigh) { // todo: exclusive v. inclusive points
-        setWidthHeight(grid);
+        setHeightWidth(grid);
         Graphics2D graph = grid.createGraphics();
         graph.setColor(plotColor);
 
@@ -499,17 +530,15 @@ public class Grapher {
     }
 
     /**
-     * Converts xCoordinate and yCoordinate to a coordinate
-     * on the userspace of graph and draws a filled circle
-     * of radius (width * graphWidth) / 2 and color graphColor. // todo: missing anything?
-     * Note: if coordinates are out of graph's range they will
-     * not be plotted.
+     * Draws point at coordinates (x,y) in graph space (not
+     * user space) with radius plotWidth. Points outside of
+     * window settings will not be plotted.
+     *
      * @param graph Graphics2D object of graph being drawn on
      * @param x x-coordinate of point being plotted
      * @param y y-coordinate of point being plotted
-     * @return
      */
-    private Graphics2D drawPoint(Graphics2D graph, double x, double y) {
+    private void drawPoint(Graphics2D graph, double x, double y) {
         /* Check to see if coordinates fall in graph range */
         if((x >= xMin && x <= xMax) && (y >= yMin && y <= yMax)) {
             /* Convert number coordinates to a coordinate on graph's user space */
@@ -521,18 +550,16 @@ public class Grapher {
 
             System.out.println("Drawing point at (" + px_coordinates[0] + "," + px_coordinates[1] + ")");
         }
-
-        return graph;
     }
 
     /**
      * Converts coordinates of a point on the graph to coordinates of // todo: make sure ratio of pixels to units isn't > int limit
      * that pixel on the userspace of the Graphics2D object where drawing
-     * takes place.
-     * Uses window settings and height and width fields. Errors will occur
-     * if these settings are not up to date.
-     * @param x
-     * @param y
+     * takes place. Performs calculations based on current window settings.
+     * Errors will occur if these are not up to date with the current graph.
+     *
+     * @param x x-coordinate of point in user space
+     * @param y y-coordinate of point in user space
      * @return int[] where int[0] is x-coordinate and int[1] is y-coordinate of
      * point's location in userspace
      */
@@ -548,11 +575,18 @@ public class Grapher {
     }
 
     /**
-     * Converts coordinates of a pixel on the userspace to the
-     * coordinates of the point on that pixel on the graph.
-     * @param x
-     * @param y
-     * @return
+     * Converts coordinates of a pixel in the userspace of
+     * the Graphics2D object where drawing takes place to
+     * coordinates of the pixel in graph space. Performs
+     * calculations based on current window settings.
+     * Errors will occur if these are not up to date with
+     * the current graph.
+     *
+     * @param x x-coordinate of pixel in graph space
+     * @param y y-coordinate of point in graph space
+     * @return double[] where double[0] is x-coordinate
+     * and double[1] is y-coordinate of point's location
+     * in userspace
      */
     private double[] pixelToCoordinate(int x, int y) {
         /* Calculate units per pixel using the formula
@@ -564,13 +598,13 @@ public class Grapher {
     }
 
     /**
-     * Sets width and height fields based on specifications of
-     * to_draw.
-     * This is used to keep the width and height fields up to date
-     * with the BufferedImage being drawn on.
+     * Sets height and width fields based on height and width of
+     * BufferedImage. This is used to keep the width and height
+     * fields up to date with the BufferedImage being drawn on.
+     *
      * @param to_draw BufferedImage upon which the graph will be drawn
      */
-    private void setWidthHeight(BufferedImage to_draw) {
+    private void setHeightWidth(BufferedImage to_draw) {
         width = to_draw.getWidth();
         height = to_draw.getHeight();
     }
