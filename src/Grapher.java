@@ -24,28 +24,28 @@ public class Grapher {
      * Must be less than yMax. Considered a "window setting"
      * because it defines the range of the graph.
      */
-    private long yMin;
+    private double yMin;
 
     /**
      * Value of y-coordinate at the top edge of the graph.
      * Must be greater than yMin. Considered a "window setting"
      * because it defines the range of the graph.
      */
-    private long yMax;
+    private double yMax;
 
     /**
      * Value of x-coordinate at the left edge of the graph.
      * Must be less than xMax. Considered a "window setting"
      * because it defines the range of the graph.
      */
-    private long xMin;
+    private double xMin;
 
     /**
      * Value of x-coordinate at the right edge of the graph.
      * Must be greater than xMin. Considered a "window setting"
      * because it defines the range of the graph.
      */
-    private long xMax;
+    private double xMax;
 
     /**
      * Whether or not to draw grid lines in the graph's background,
@@ -129,7 +129,6 @@ public class Grapher {
      */
     private Font labelFont;
 
-    // todo: check that range makes sense; Add documentation
     // todo: allow user to set BasicStrokes for components
     /**
      * Default constructor. Sets window range from -10 to 10
@@ -161,6 +160,38 @@ public class Grapher {
 
         plotWidth = 2;
         plotColor = Color.BLACK;
+    }
+
+    private void setWindow(double xMin, double xMax, double yMin, double yMax) {
+        this.xMin = xMin;
+        this.xMax = xMax;
+        this.yMin = yMin;
+        this.yMax = yMax;
+    }
+
+    private void setColors(Color backgroundColor, Color gridLineColor,
+                           Color axisColor, Color plotColor) {
+        this.backgroundColor = backgroundColor;
+        this.gridLineColor = gridLineColor;
+        this.axisColor = axisColor;
+        this.plotColor = plotColor;
+    }
+
+    private void setStrokes(BasicStroke gridLineStroke, BasicStroke axisStroke) {
+        this.gridLineStroke = gridLineStroke;
+        this.axisStroke = axisStroke;
+    }
+
+    private void setStrokes(int gridLineThickness, int axisThickness) {
+        this.gridLineStroke = new BasicStroke(gridLineThickness);
+        this.axisStroke = new BasicStroke(axisThickness);
+    }
+
+    private void setSettings(boolean drawGridlines, boolean drawTicks,
+                             boolean labelTicks) {
+        this.drawGridlines = drawGridlines;
+        this.drawTicks = drawTicks;
+        this.labelTicks = labelTicks;
     }
 
     /**
