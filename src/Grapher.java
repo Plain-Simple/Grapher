@@ -246,7 +246,6 @@ public class Grapher {
         /* Draw horizontal grid lines starting from start_x and moving down */
         for(int i = start_x; i < height; i += spacing_x) {
             graph.draw(new Line2D.Double(0, i, width, i));
-            System.out.println("Drawing gridLine from (0," + i + ") to (" + width + "," + i + ")");
         }
 
         int start_y = getFirstYGridLine();
@@ -255,7 +254,6 @@ public class Grapher {
         /* Draw vertical grid lines starting from start_y and moving right */
         for(int i = start_y; i < width; i += spacing_y) {
             graph.draw(new Line2D.Double(i, 0, i, height));
-            System.out.println("Drawing gridLine from (" + i + ",0) to (" + i + "," + height + ")");
         }
     }
 
@@ -336,7 +334,6 @@ public class Grapher {
 
             /* Draw y-axis */
             graph.draw(new Line2D.Double(start_x[0], start_x[1], end_x[0], end_x[1]));
-            System.out.println("\nDrawing axis from (" + start_x[0] + "," + start_x[1] + ") to (" + end_x[0] + "," + end_x[1] + ")");
 
             if(drawTicks) {
                 graph.setStroke(gridLineStroke);
@@ -348,7 +345,7 @@ public class Grapher {
 
                 for(int i = start_y, j = 1; i < height; i += spacing_x, j++) {
                     graph.draw(new Line2D.Double(start_x[0], i, start_x[0] + tickLength, i));
-                    System.out.println("Drawing tick from (" + start_x[0] + "," + i + ") to (" + start_x[0] + tickLength + "," + i + ")");
+
                     /* Label every other tick, except zero (zero is labeled on the x-axis) */
                     if(j % 2 == 0 && first_tick - j * gridLineSpacing != 0 && labelTicks == true)
                         drawLeftJustifiedString(graph, Double.toString(first_tick - j * gridLineSpacing), start_x[0], i);
@@ -364,7 +361,6 @@ public class Grapher {
 
             /* Draw x-axis */
             graph.draw(new Line2D.Double(start_y[0], start_y[1], end_y[0], end_y[1]));
-            System.out.println("\nDrawing axis from (" + start_y[0] + "," + start_y[1] + ") to (" + end_y[0] + "," + end_y[1] + ")");
 
             if(drawTicks) {
                 graph.setStroke(gridLineStroke);
@@ -376,7 +372,7 @@ public class Grapher {
 
                 for(int i = start_x, j = 1; i < width; i += spacing_y, j++) {
                     graph.draw(new Line2D.Double(i, start_y[1], i, start_y[1] - tickLength));
-                    System.out.println("Drawing tick from (" + i + "," + start_y[1] + ") to (" + i + "," + (start_y[1] - tickLength) + ")");
+
                     if(j % 2 == 0 && drawTicks == true)
                         drawCenteredString(graph, Double.toString(first_tick + j * gridLineSpacing), i, start_y[1]);
                 }
@@ -469,9 +465,7 @@ public class Grapher {
         setHeightWidth(blank_image);
 
         if(validateSettings()) {
-            blank_image = drawGrid(blank_image);
-            System.out.println();
-            return drawGraphOnGrid(blank_image, points, labelPoints);
+            return drawGraphOnGrid(drawGrid(blank_image), points, labelPoints);
         }
 
         return blank_image;
@@ -520,7 +514,7 @@ public class Grapher {
      * Draws graph and uses f(x) function in calculate(double x)
      * to plot points continuously from rangeLow to rangeHigh
      * on the graph. Points outside window range will not be plotted.
-     * Points are drawn as circles with diameter plotWidth and plotColor. // todo: need a smarter algorithm
+     * Points are drawn as circles with diameter plotWidth and plotColor. // todo: smarter algorithm?
      *
      * @param blank_image BufferedImage on which to draw the graph
      * @param rangeLow lowest x-value, inclusive, to use in calculating f(x) values
@@ -583,8 +577,6 @@ public class Grapher {
              * Coordinates must be adjusted because filloval draws the shape in a box that
              * starts at the specified coordinates and goes down and right */
             graph.fillOval(px_coordinates[0] - plotWidth / 2, px_coordinates[1] - plotWidth / 2, plotWidth, plotWidth);
-
-            System.out.println("Drawing point at (" + px_coordinates[0] + "," + px_coordinates[1] + ")");
         }
     }
 
