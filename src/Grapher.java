@@ -345,7 +345,6 @@ public class Grapher {
                 int spacing_x = getXGridLineSpacing();
 
                 double first_tick = pixelToCoordinate(start_y, start_x[1])[1];
-                System.out.println("First y tick at " + first_tick);
 
                 for(int i = start_y, j = 1; i < height; i += spacing_x, j++) {
                     graph.draw(new Line2D.Double(start_x[0], i, start_x[0] + tickLength, i));
@@ -551,10 +550,16 @@ public class Grapher {
         Graphics2D graph = grid.createGraphics();
         graph.setColor(plotColor);
 
+        /* Calculate interval between pixels */
         float units_per_pxl = (float) (xMax - xMin) / width;
 
-        for(double i = rangeLow; i <= rangeHigh; i += units_per_pxl) {
-            drawPoint(graph, i, calculate(i));
+        int[] point0 = coordinateToPixel(rangeLow, calculate(rangeLow));
+
+        /* Move from left to right, drawing lines between pixels */
+        for(double i = rangeLow + units_per_pxl; i <= rangeHigh; i += units_per_pxl) {
+            int[] point1 = coordinateToPixel(i, calculate(i));
+            graph.draw(new Line2D.Double(point0[0], point0[1], point1[0], point1[1]));
+            point0 = point1;
         }
 
         return grid;
