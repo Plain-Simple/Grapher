@@ -151,7 +151,7 @@ public class Grapher {
 
         drawTicks = true;
         tickLength = 4;
-        labelTicks = false;
+        labelTicks = true;
 
         backgroundColor = Color.WHITE;
 
@@ -271,7 +271,7 @@ public class Grapher {
          * gridLineSpacing = 1 -> 0.2 periods to first gridline */
         double x_period_left = 1 - xMin % gridLineSpacing;
 
-        /* Calculate where first gridline will be */
+        /* Calculate where the first gridline will be */
         return (int) (x_period_left * getXGridLineSpacing());
     }
 
@@ -289,7 +289,7 @@ public class Grapher {
          * gridLineSpacing = 1 -> 0.2 periods to first gridline */
         double y_period_left = 1 - yMin % gridLineSpacing;
 
-        /* Calculate where first gridlines will be */
+        /* Calculate where the first gridline will be */
         return (int) (y_period_left * getYGridLineSpacing());
     }
 
@@ -337,17 +337,18 @@ public class Grapher {
 
             if(drawTicks) {
                 graph.setStroke(gridLineStroke);
-                /* Get starting coordinate of first horizontal gridline and spacing */
+                /* Get starting y-coordinate of first horizontal gridline and spacing */
                 int start_y = getFirstXGridLine();
                 int spacing_x = getXGridLineSpacing();
 
+                /* Calculate y-value of first tick */
                 double first_tick = pixelToCoordinate(start_y, start_x[1])[1];
 
                 for(int i = start_y, j = 1; i < height; i += spacing_x, j++) {
                     graph.draw(new Line2D.Double(start_x[0], i, start_x[0] + tickLength, i));
 
                     /* Label every other tick, except zero (zero is labeled on the x-axis) */
-                    if(j % 2 == 0 && first_tick - j * gridLineSpacing != 0 && labelTicks == true)
+                    if(labelTicks == true && j % 2 == 0 && first_tick - j * gridLineSpacing != 0)
                         drawLeftJustifiedString(graph, Double.toString(first_tick - j * gridLineSpacing), start_x[0], i);
                 }
             }
@@ -364,16 +365,17 @@ public class Grapher {
 
             if(drawTicks) {
                 graph.setStroke(gridLineStroke);
+
                 /* Get starting x-coordinate of first vertical gridline and spacing */
                 int start_x = getFirstYGridLine();
                 int spacing_y = getYGridLineSpacing();
 
                 double first_tick = pixelToCoordinate(start_x, start_y[1])[0];
 
-                for(int i = start_x, j = 1; i < width; i += spacing_y, j++) {
+                for(int i = start_x, j = 0; i < width; i += spacing_y, j++) {
                     graph.draw(new Line2D.Double(i, start_y[1], i, start_y[1] - tickLength));
 
-                    if(j % 2 == 0 && drawTicks == true)
+                    if(labelTicks == true && j % 2 == 0)
                         drawCenteredString(graph, Double.toString(first_tick + j * gridLineSpacing), i, start_y[1]);
                 }
             }
@@ -437,10 +439,10 @@ public class Grapher {
             throw new IndexOutOfBoundsException("xMax cannot be less than or equal to xMin");
         if(yMax <= yMin)
             throw new IndexOutOfBoundsException("yMax cannot be less than or equal to yMin");
-        if(height <= 0)
-            throw new IndexOutOfBoundsException("height cannot be less than or equal to zero");
-        if(width <= 0)
-            throw new IndexOutOfBoundsException("width cannot be less than or equal to zero");
+        if(height == 0)
+            throw new IndexOutOfBoundsException("height cannot be equal to zero");
+        if(width == 0)
+            throw new IndexOutOfBoundsException("width cannot be equal to zero");
         return true;
     }
 
@@ -461,7 +463,8 @@ public class Grapher {
      * @throws IndexOutOfBoundsException if double[0] is a different
      * size than double[1]
      */
-    public BufferedImage drawGraph(BufferedImage blank_image, double[][] points, boolean labelPoints) throws IndexOutOfBoundsException {
+    public BufferedImage drawGraph(BufferedImage blank_image, double[][] points,
+                                   boolean labelPoints) throws IndexOutOfBoundsException {
         setHeightWidth(blank_image);
 
         if(validateSettings()) {
@@ -499,7 +502,11 @@ public class Grapher {
             graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
             for(int i = 0; i < points[0].length; i++) {
-                drawPoint(graph, points[0][i], points[1][i]);
+                try {
+                    drawPoint(graph, points[0][i], points[1][i]);
+                } catch(IndexOutOfBoundsException e) {
+                    throw new IndexOutOfBoundsException("points[1] must have at least as many elements as points[0]");
+                }
                 if(labelPoints) {
                     int[] coordinates = coordinateToPixel(points[0][i], points[1][i]);
                     drawCenteredString(graph, "(" + points[0][i] + "," + points[1][i] + ")", coordinates[0], coordinates[1]);
@@ -581,7 +588,7 @@ public class Grapher {
     }
 
     /**
-     * Converts coordinates of a point on the graph to coordinates of // todo: make sure ratio of pixels to units isn't > int limit
+     * Converts coordinates of a point on the graph to coordinates of
      * that pixel on the userspace of the Graphics2D object where drawing
      * takes place. Performs calculations based on current window settings.
      * Errors will occur if these are not up to date with the current graph.
