@@ -129,10 +129,15 @@ public class Grapher {
     private BasicStroke axisStroke;
 
     /**
-     * Thickness, in pixels, of points and lines
-     * drawn on the graph. // todo: individual points thicker than sets
+     * Thickness, in pixels, of lines drawn on the graph. // todo: individual points thicker than sets
      */
     private int plotWidth;
+
+    /**
+     * Diameter (px) of points plotted individually on
+     * the graph.
+     */
+    private int pointWidth;
 
     /**
      * Color used to draw points on the graph.
@@ -150,11 +155,12 @@ public class Grapher {
      * on the x-axis and -10 to 10 on the y-axis. Sets
      * drawGridLines and drawTicks to true. gridLineSpacing is
      * set to 1, gridLineStroke and axisStroke to 1 pixel thick,
-     * and plotWidth to 2. Default colors are white for background,
-     * black for plot and axis, and grey for grid lines and ticks.
+     * plotWidth to 2, and pointWidth to 6. Default colors are
+     * white for background, black for plot and axis, and grey
+     * for grid lines and ticks.
      */
-    public Grapher() { // todo: constructor for setting line thicknesses directly, not just through basicstroke
-        yMin = -10;    // todo: specify default values
+    public Grapher() {
+        yMin = -10;
         yMax = 10;     // todo: remember precision of each value. Label with lowest precision
         xMin = -10;
         xMax = 10;
@@ -174,17 +180,34 @@ public class Grapher {
         axisStroke = new BasicStroke(1);
 
         plotWidth = 2;
+        pointWidth = 6;
         plotColor = Color.BLACK;
     }
 
-    private void setWindow(double xMin, double xMax, double yMin, double yMax) {
+    /**
+     * Sets window of graph.
+     *
+     * @param xMin minimum x-value to display
+     * @param xMax maximum x-value to display
+     * @param yMin minimum y-value to display
+     * @param yMax maximum y-value to display
+     */
+    public void setWindow(double xMin, double xMax, double yMin, double yMax) {
         this.xMin = xMin;
         this.xMax = xMax;
         this.yMin = yMin;
         this.yMax = yMax;
     }
 
-    private void setColors(Color backgroundColor, Color gridLineColor,
+    /**
+     * Setter function for colors used to draw graph.
+     *
+     * @param backgroundColor base color of graph
+     * @param gridLineColor color used to draw grid lines
+     * @param axisColor color used to draw axis and ticks
+     * @param plotColor color used to draw plotted points
+     */
+    public void setColors(Color backgroundColor, Color gridLineColor,
                            Color axisColor, Color plotColor) {
         this.backgroundColor = backgroundColor;
         this.gridLineColor = gridLineColor;
@@ -192,22 +215,64 @@ public class Grapher {
         this.plotColor = plotColor;
     }
 
-    private void setStrokes(BasicStroke gridLineStroke, BasicStroke axisStroke) {
+    /**
+     * Setter function for strokes used to draw graph.
+     * For a simpler method, see setStrokes(int, int).
+     *
+     * @param gridLineStroke BasicStroke used to draw grid lines
+     * @param axisStroke BasicStroke used to draw axis
+     */
+    public void setStrokes(BasicStroke gridLineStroke, BasicStroke axisStroke) {
         this.gridLineStroke = gridLineStroke;
         this.axisStroke = axisStroke;
     }
 
-    private void setStrokes(int gridLineThickness, int axisThickness) {
+    /**
+     * Setter function for strokes used to draw graph.
+     *
+     * @param gridLineThickness width (px) of grid lines to be drawn
+     * @param axisThickness width (px) of axis to be drawn
+     */
+    public void setStrokes(int gridLineThickness, int axisThickness) {
         this.gridLineStroke = new BasicStroke(gridLineThickness);
         this.axisStroke = new BasicStroke(axisThickness);
     }
 
-    private void setSettings(boolean drawGridlines, boolean drawTicks,
+    /**
+     * Setter function for general graph settings.
+     *
+     * @param drawGridlines whether or not to draw grid lines on the graph
+     * @param drawTicks whether or not to draw ticks along the axis
+     * @param labelTicks whether or not to numerically label ticks
+     */
+    public void setSettings(boolean drawGridlines, boolean drawTicks,
                              boolean labelTicks) {
         this.drawGridlines = drawGridlines;
         this.drawTicks = drawTicks;
         this.labelTicks = labelTicks;
     }
+
+    /**
+     * Sets width, in pixels, of points plotted in
+     * using a function.
+     *
+     * @param plotWidth diameter of points to be plotted using function
+     */
+    public void setPlotWidth(int plotWidth) {
+        this.plotWidth = plotWidth;
+    }
+
+    /**
+     * Sets width, in pixels, of individually plotted
+     * points.
+     *
+     * @param pointWidth diameter of points to be plotted individually
+     */
+    public void setPointWidth(int pointWidth) {
+        this.pointWidth = pointWidth;
+    }
+
+    // todo: reset() method to reset to default values
 
     /**
      * Draws the grid, or background, for the function/points
@@ -465,7 +530,7 @@ public class Grapher {
      * Coordinates of points to draw on graph are passed in 2d array
      * where double[0][index] gives the x-coordinate of a point and
      * double[1][index] gives the corresponding y-coordinate. Points are
-     * drawn as circles with radius plotWidth and plotColor. Passing
+     * drawn as circles with radius pointWidth and plotColor. Passing
      * labelPoints as true will label each point with comma-separated
      * coordinates in parentheses next to the point (e.g. (x,y)).
      *
@@ -478,7 +543,6 @@ public class Grapher {
     public void drawGraph(BufferedImage blankImage, double[][] points,
                                    boolean labelPoints) throws IndexOutOfBoundsException {
         setHeightWidth(blankImage);
-
         if(validateSettings()) {
             drawGrid(blankImage);
             drawGraphOnGrid(blankImage, points, labelPoints);
@@ -493,7 +557,7 @@ public class Grapher {
      * to draw on graph are passed in 2d array where double[0][index]
      * gives the x-coordinate of a point and double[1][index] gives
      * the corresponding y-coordinate. Points are drawn as circles
-     * with radius plotWidth and plotColor. Passing labelPoints as
+     * with radius pointWidth and plotColor. Passing labelPoints as
      * true will label each point with comma-separated coordinates
      * in parentheses next to the point (e.g. (x,y)).
      *
@@ -572,7 +636,7 @@ public class Grapher {
 
     /**
      * Draws point at coordinates (x,y) in graph space (not
-     * user space) with radius plotWidth. Points outside of
+     * user space) with radius pointWidth. Points outside of
      * window settings will not be plotted.
      *
      * @param graph Graphics2D object of graph being drawn on
@@ -584,10 +648,11 @@ public class Grapher {
         if((x >= xMin && x <= xMax) && (y >= yMin && y <= yMax)) {
             /* Convert number coordinates to a coordinate on graph's user space */
             int[] px_coordinates = coordinateToPixel(x, y);
-            /* Draw a point with diameter = plotWidth at specified coordinates in userspace.
+            /* Draw a point with diameter = pointWidth at specified coordinates in userspace.
              * Coordinates must be adjusted because filloval draws the shape in a box that
              * starts at the specified coordinates and goes down and right */
-            graph.fillOval(px_coordinates[0] - plotWidth / 2, px_coordinates[1] - plotWidth / 2, plotWidth, plotWidth);
+            graph.fillOval(px_coordinates[0] - pointWidth / 2,
+                    px_coordinates[1] - pointWidth / 2, pointWidth, pointWidth);
         }
     }
 
