@@ -185,14 +185,26 @@ public class Grapher {
     }
 
     /**
-     * Sets window of graph.
+     * Sets window of graph using specified values.
+     * Values will be ignored if they are invalid.
      *
      * @param xMin minimum x-value to display
      * @param xMax maximum x-value to display
      * @param yMin minimum y-value to display
      * @param yMax maximum y-value to display
+     * @throws IndexOutOfBoundsException if xMin >= xMax
+     * or yMin >= yMax
      */
-    public void setWindow(double xMin, double xMax, double yMin, double yMax) {
+    public void setWindow(double xMin, double xMax, double yMin,
+                          double yMax) throws IndexOutOfBoundsException {
+        if(xMin >= xMax) {
+            throw new IndexOutOfBoundsException("Error: Invalid Window Range. " +
+                    "xMin cannot be greater than or equal to xMax");
+        }
+        if(yMin >= yMax) {
+            throw new IndexOutOfBoundsException("Error: Invalid Window Range. " +
+                    "yMin cannot be greater than or equal to yMax");
+        }
         this.xMin = xMin;
         this.xMax = xMax;
         this.yMin = yMin;
