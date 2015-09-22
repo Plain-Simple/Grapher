@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 /**
  * A java library for drawing highly-customizable, two-dimensional graphs.
  * Copyright (C) 2015 Stefan Kussmaul
- * See https://github.com/Stefan4472/Grapher for more information. 
+ * See https://github.com/Stefan4472/Grapher for more information.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -215,22 +215,20 @@ public class Grapher {
      * of the graph, draws grid lines (if drawGridLines = true),
      * draws axis, and draws ticks (if drawTicks = true).
      *
-     * @param blank_image BufferedImage for grid to be drawn on
-     * @return the BufferedImage with a grid drawn on it
+     * @param blankImage BufferedImage for grid to be drawn on
      */
-    public BufferedImage drawGrid(BufferedImage blank_image) {
-        setHeightWidth(blank_image);
+    public void drawGrid(BufferedImage blankImage) {
+        setHeightWidth(blankImage);
 
-        Graphics2D graphics = blank_image.createGraphics();
+        Graphics2D graphics = blankImage.createGraphics();
 
         if(validateSettings()) {
             drawBackground(graphics);
-            if (drawGridlines)
+            if (drawGridlines) {
                 drawGridLines(graphics);
+            }
             drawAxis(graphics);
         }
-
-        return blank_image;
     }
 
     /**
@@ -471,28 +469,26 @@ public class Grapher {
      * labelPoints as true will label each point with comma-separated
      * coordinates in parentheses next to the point (e.g. (x,y)).
      *
-     * @param blank_image BufferedImage on which to draw graph
+     * @param blankImage BufferedImage on which to draw graph
      * @param points x- and y-values of points to plot
      * @param labelPoints whether or not to label points with their coordinates
-     * @return BufferedImage with graph drawn on it
      * @throws IndexOutOfBoundsException if double[0] is a different
      * size than double[1]
      */
-    public BufferedImage drawGraph(BufferedImage blank_image, double[][] points,
+    public void drawGraph(BufferedImage blankImage, double[][] points,
                                    boolean labelPoints) throws IndexOutOfBoundsException {
-        setHeightWidth(blank_image);
+        setHeightWidth(blankImage);
 
         if(validateSettings()) {
-            return drawGraphOnGrid(drawGrid(blank_image), points, labelPoints);
+            drawGrid(blankImage);
+            drawGraphOnGrid(blankImage, points, labelPoints);
         }
-
-        return blank_image;
     }
 
     /**
      * Plots points on the specified BufferedImage,
      * which is assumed to be a pre-rendered grid with the same
-     * window values as the current graph being drawn on it. Points
+     * window values as the current graph being drawn. Points
      * outside window range will not be plotted. Coordinates of points
      * to draw on graph are passed in 2d array where double[0][index]
      * gives the x-coordinate of a point and double[1][index] gives
@@ -504,11 +500,10 @@ public class Grapher {
      * @param grid BufferedImage on which to plot points
      * @param points x- and y-values of points to plot
      * @param labelPoints whether or not to label points with their coordinates
-     * @return BufferedImage with points plotted on it
      * @throws IndexOutOfBoundsException if double[0] is a different
      * size than double[1]
      */
-    public BufferedImage drawGraphOnGrid(BufferedImage grid,
+    public void drawGraphOnGrid(BufferedImage grid,
              double[][] points, boolean labelPoints) throws IndexOutOfBoundsException { // todo: catch exception and throw one with message
         setHeightWidth(grid);
         if(validateSettings()) {
@@ -528,8 +523,6 @@ public class Grapher {
                 }
             }
         }
-
-        return grid;
     }
 
     /**
@@ -538,20 +531,19 @@ public class Grapher {
      * on the graph. Points outside window range will not be plotted.
      * Points are drawn as circles with diameter plotWidth and plotColor. // todo: smarter algorithm?
      *
-     * @param blank_image BufferedImage on which to draw the graph
+     * @param blankImage BufferedImage on which to draw the graph
      * @param rangeLow lowest x-value, inclusive, to use in calculating f(x) values
      * @param rangeHigh highest x-value, inclusive, to use in calculating f(x) values
-     * @return BufferedImage with graph drawn on it
      */
-    public BufferedImage drawGraph(BufferedImage blank_image, double rangeLow, double rangeHigh) { // todo: rename param blank_image?
-        setHeightWidth(blank_image);
-        blank_image = drawGrid(blank_image);
-        return drawGraphOnGrid(blank_image, rangeLow, rangeHigh);
+    public void drawGraph(BufferedImage blankImage, double rangeLow, double rangeHigh) {
+        setHeightWidth(blankImage);
+        drawGrid(blankImage);
+        drawGraphOnGrid(blankImage, rangeLow, rangeHigh);
     }
 
     /**
      * Plots points on the specified BufferedImage using f(x)
-     * function in calculate(double x) to plot points continuosly
+     * function in calculate(double x) to plot points continuously
      * form rangeLow to rangeHigh on the graph. Points outside
      * window range will not be plotted. Points are drawn as
      * circles with diameter plotWidth and plotColor.
@@ -559,9 +551,8 @@ public class Grapher {
      * @param grid BufferedImage on which to plot points
      * @param rangeLow lowest x-value, inclusive, to use in calculating f(x) values
      * @param rangeHigh highest x-value, inclusive, to use in calculating f(x) values
-     * @return BufferedImage with points plotted on it
      */
-    public BufferedImage drawGraphOnGrid(BufferedImage grid, double rangeLow, double rangeHigh) { // todo: exclusive v. inclusive points
+    public void drawGraphOnGrid(BufferedImage grid, double rangeLow, double rangeHigh) { // todo: exclusive v. inclusive points
         setHeightWidth(grid);
         Graphics2D graph = grid.createGraphics();
         graph.setColor(plotColor);
@@ -577,8 +568,6 @@ public class Grapher {
             graph.draw(new Line2D.Double(point0[0], point0[1], point1[0], point1[1]));
             point0 = point1;
         }
-
-        return grid;
     }
 
     /**
